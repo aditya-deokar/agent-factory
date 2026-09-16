@@ -45,26 +45,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Build the tarball
-        run: npm pack --dry-run 2>&1 | tee pack.txt
-      - name: Every vendored skill still ships its LICENSE
-        run: |
-          set -e
-          for d in skills/*/; do
-            name=$(basename "$d")
-            if grep -q 'vendored-from' "$d/SKILL.md"; then
-              test -f "$d/LICENSE" || { echo "::error::$name is vendored but has no LICENSE"; exit 1; }
-              grep -q "skills/$name/LICENSE" pack.txt || { echo "::error::$name LICENSE missing from the npm tarball"; exit 1; }
-            fi
-          done
-          echo "All vendored licenses present in the package."
-      - name: No junk in the tarball
-        run: |
-          set -e
-          for bad in node_modules __pycache__ .git/ .artifacts; do
-            if grep -q "$bad" pack.txt; then echo "::error::$bad leaked into the package"; exit 1; fi
-          done
-          echo "Tarball is clean."
+      # Parses each skill's frontmatter rather than grepping the whole file:
+      # a skill that documents 'vendored-from' in its body is not vendored.
+      - name: Vendored licenses ship, no junk in the tarball
+        run: node scripts/check-package.mjs
 
   tests:
     name: Recorder tests

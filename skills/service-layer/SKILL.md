@@ -1,5 +1,5 @@
 ---
-name: code-structure
+name: service-layer
 description: >
   Decide whether code belongs in an orchestration boundary or a shared service,
   and extract shared mechanics safely. Use when the same operational logic
@@ -17,7 +17,7 @@ metadata:
   version: "2.0"
 ---
 
-# Code structure
+# Service layer
 
 Two questions decide where a piece of code lives.
 

@@ -1,5 +1,5 @@
 ---
-name: before-and-after
+name: visual-diff
 description: Captures before/after screenshots of web pages or elements for visual comparison. Use when user says "take before and after", "screenshot comparison", "visual diff", "PR screenshots", "compare old and new", or needs to document UI changes. Accepts two URLs (file://, http://, https://) or two image paths.
 license: PolyForm-Shield-1.0.0
 compatibility: >
@@ -13,7 +13,7 @@ metadata:
   version: "1.1"
 allowed-tools:
   - Bash(npx @vercel/before-and-after *)
-  - Bash(before-and-after *)
+  - Bash(visual-diff *)
   - Bash(which before-and-after)
   - Bash(npm install -g @vercel/before-and-after)
   - Bash(*/upload-and-copy.sh *)
@@ -26,10 +26,10 @@ allowed-tools:
   - Bash(which gh)
 ---
 
-# Before-After Screenshot Skill
+# Visual diff
 
 > **Package:** `@vercel/before-and-after`
-> Never use `before-and-after` (wrong package).
+> Never use `visual-diff` (wrong package).
 
 ## Agent Behavior Rules
 
@@ -47,7 +47,7 @@ allowed-tools:
 
 1. **Pre-flight** — `which before-and-after || npm install -g @vercel/before-and-after`
 2. **Protection check** — if `.vercel.app` URL: `curl -s -o /dev/null -w "%{http_code}" "<url>"` (401/403 = protected)
-3. **Capture** — `before-and-after "<before-url>" "<after-url>"`
+3. **Capture** — `visual-diff "<before-url>" "<after-url>"`
 4. **Upload** - `"$SKILL_DIR/scripts/upload-and-copy.sh" <before.png> <after.png> --markdown`
 5. **PR integration** — optionally `gh pr edit` to append markdown
 
@@ -57,21 +57,21 @@ allowed-tools:
 
 ```bash
 # Basic usage
-before-and-after <before-url> <after-url>
+visual-diff <before-url> <after-url>
 
 # With selector
-before-and-after url1 url2 ".hero-section"
+visual-diff url1 url2 ".hero-section"
 
 # Different selectors for each
-before-and-after url1 url2 ".old-card" ".new-card"
+visual-diff url1 url2 ".old-card" ".new-card"
 
 # Viewports
-before-and-after url1 url2 --mobile    # 375x812
-before-and-after url1 url2 --tablet    # 768x1024
-before-and-after url1 url2 --full      # full scroll
+visual-diff url1 url2 --mobile    # 375x812
+visual-diff url1 url2 --tablet    # 768x1024
+visual-diff url1 url2 --full      # full scroll
 
 # From existing images
-before-and-after before.png after.png --markdown
+visual-diff before.png after.png --markdown
 
 # Via npx (use full package name!)
 npx @vercel/before-and-after url1 url2
@@ -96,7 +96,7 @@ or `.agents/skills/`, a bare `./scripts/...` resolves against the repo you are
 working in and fails.
 
 ```bash
-SKILL_DIR="$(dirname "$(find . ~/.claude/skills .claude/skills .agents/skills   -name SKILL.md -path '*before-and-after*' 2>/dev/null | head -1)")"
+SKILL_DIR="$(dirname "$(find . ~/.claude/skills .claude/skills .agents/skills   -name SKILL.md -path '*visual-diff*' 2>/dev/null | head -1)")"
 
 # Default (0x0.st - no signup needed)
 "$SKILL_DIR/scripts/upload-and-copy.sh" before.png after.png --markdown

@@ -1,5 +1,5 @@
 ---
-name: release-train
+name: package-release
 description: Cut a versioned release of a skills repo and publish it to npm and GitHub. Use when asked to publish, release, ship a new version, bump the version, or tag a release of an agent-skills package. Covers semver for skills, the pre-publish audit, npm scoped publishing, GitHub releases, and rollback.
 license: MIT
 compatibility: Requires Node.js 18+, npm 9+ with an authenticated account (npm whoami), git, and an authenticated gh CLI for the GitHub release step. Scoped packages need --access public on first publish or npm rejects them as private.
@@ -9,7 +9,7 @@ metadata:
 allowed-tools: Bash(npm:*) Bash(npx skills *) Bash(git:*) Bash(gh release *) Bash(node:*)
 ---
 
-# Release train
+# Package release
 
 Publishing a skills package is not publishing a library. Nobody imports it.
 People install the files and an agent reads them, so the failure mode is not a
@@ -107,14 +107,14 @@ skills and wants to know whether theirs moved.
 ## v1.2.0
 
 ### Added
-- `windows-shell` - PowerShell and Git Bash portability rules.
+- `cross-platform-shell` - PowerShell and Git Bash portability rules.
 
 ### Changed
-- `before-and-after` - scripts are now resolved from the skill directory.
+- `visual-diff` - scripts are now resolved from the skill directory.
   Bodies that hardcoded a relative script path stopped working after install.
 
 ### Fixed
-- `new-feature` - the port check assumed lsof, which Windows does not have.
+- `worktree-isolation` - the port check assumed lsof, which Windows does not have.
 ```
 
 Say what broke and why it changed. "Various improvements" tells a reader

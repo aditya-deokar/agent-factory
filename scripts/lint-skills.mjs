@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Validates every skill in skills/ against the Agent Skills spec plus the
- * house rules in skills/skill-forge/SKILL.md.
+ * house rules in skills/skill-authoring/SKILL.md.
  *
  * Exits non-zero on any error, so it is safe to wire into prepublishOnly and CI.
  * Usage: node scripts/lint-skills.mjs [--strict]

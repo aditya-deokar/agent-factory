@@ -9,7 +9,7 @@ all ten skills today.
 
 ## Provenance, which is settled
 
-Three skills (`code-structure`, `evidence-driven-testing`, `new-feature`) began
+Three skills (`service-layer`, `test-evidence`, `worktree-isolation`) began
 as copies from [michaelshimeles/skills](https://github.com/michaelshimeles/skills),
 a repository with no license file. No license means all rights reserved, so
 those copies could not legally be republished.
@@ -22,9 +22,9 @@ format and tests.
 
 Nothing from that repository remains. npm is unblocked.
 
-The three vendored skills that stay vendored are fine as they are. `greploop`,
-`greploop-apps`, and `unslop` are MIT with their license files intact.
-`before-and-after` is PolyForm Shield, which permits redistribution as long as
+The three vendored skills that stay vendored are fine as they are. `code-review-loop`,
+`code-review-loop-large`, and `prose-cleanup` are MIT with their license files intact.
+`visual-diff` is PolyForm Shield, which permits redistribution as long as
 the notice survives, and CI fails the build if it does not.
 
 ---
@@ -40,8 +40,8 @@ the notice survives, and CI fails the build if it does not.
 - [x] `npx skills add . --list` reports "Found 10 skills".
 - [x] Three skills rewritten as original work, recorder replaced.
 - [x] `package.json`, `LICENSE`, `NOTICE.md`, `.gitattributes`, CI workflow.
-- [x] Two portability bugs fixed: `before-and-after` resolved scripts against
-      the wrong directory once installed, and `new-feature` assumed `lsof`.
+- [x] Two portability bugs fixed: `visual-diff` resolved scripts against
+      the wrong directory once installed, and `worktree-isolation` assumed `lsof`.
 - [x] 26 tests passing (4 more need ffmpeg and run in CI).
 
 ## Phase 1: git
@@ -168,7 +168,7 @@ the leaderboard.
 
 ## Phase 6: keep it alive
 
-Use `release-train` for every release after this one. It is in the package for
+Use `package-release` for every release after this one. It is in the package for
 exactly this.
 
 **Versioning**, short form: removing or renaming a skill is major, because the
@@ -178,7 +178,7 @@ Adding a skill is minor. Fixing a broken path or a wrong flag is patch. Bump
 skill can tell whether theirs moved.
 
 **The audit that runs before every publish** lives in
-`skills/release-train/SKILL.md`. CI covers most of it now.
+`skills/package-release/SKILL.md`. CI covers most of it now.
 
 **Rollback**, since npm forbids republishing a version number: unpublish works
 within 72 hours if nothing depends on it, otherwise `npm deprecate` the bad

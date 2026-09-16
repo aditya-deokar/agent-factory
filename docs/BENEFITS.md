@@ -27,7 +27,7 @@ it.
 
 ## Per skill
 
-### new-feature
+### worktree-isolation
 
 **Costs** about 30 seconds per task.
 
@@ -42,7 +42,7 @@ is discovering it at merge, after both branches are finished.
 **Skip it** when you work alone in one session and never run parallel agents.
 The overhead is real and the benefit is not.
 
-### code-structure
+### service-layer
 
 **Costs** some judgment calls and occasional argument about where a function
 belongs.
@@ -59,7 +59,7 @@ hides control flow behind indirection that pays for nothing.
 **Skip it** on prototypes and scripts. Structure is a bet that code will be
 changed repeatedly, and throwaway code never collects on that bet.
 
-### evidence-driven-testing
+### test-evidence
 
 The expensive one and the valuable one.
 
@@ -82,7 +82,7 @@ first time.
 non-UI changes still need evidence, just different evidence: a measured
 latency delta, a diff of command output, a transcript excerpt.
 
-### before-and-after
+### visual-diff
 
 **Costs** one command.
 
@@ -93,7 +93,7 @@ Reviewers look at two images and know immediately whether it is right.
 **Watch out** for the default upload host. 0x0.st is public and unauthenticated.
 Fine for a landing page, wrong for a screen with a customer record on it.
 
-### greploop and greploop-apps
+### code-review-loop and code-review-loop-large
 
 **Costs** Greptile (a paid service on most plans) and whatever the review cycles
 take in wall clock time.
@@ -109,7 +109,7 @@ too large, not that the loop needs more rounds.
 **Skip them** if you do not have Greptile. Neither skill degrades gracefully;
 without the service they have nothing to talk to.
 
-### unslop
+### prose-cleanup
 
 **Costs** nothing. No tools, no runtime.
 
@@ -121,7 +121,7 @@ is fair.
 The 31 patterns are specific enough to be checkable rather than aspirational.
 "Avoid em dashes" is a rule. "Write clearly" is not.
 
-### skill-forge
+### skill-authoring
 
 **Returns** the answer to the question that wastes the most time in this space:
 why is my skill not firing? Nearly always the description, because the agent
@@ -129,7 +129,7 @@ never reads the body until the description convinces it to.
 
 Directly relevant to you now that you maintain a ten-skill package.
 
-### release-train
+### package-release
 
 **Returns** the npm facts that are expensive to learn by making the mistake.
 Scoped packages need `--access public` or the first publish fails with an error
@@ -137,7 +137,7 @@ that reads like a billing problem. A published version can never be
 republished. Renaming a skill folder is a breaking change even though it looks
 cosmetic.
 
-### windows-shell
+### cross-platform-shell
 
 **Returns** the difference between a repo that works on your machine and one
 that works on everyone's. Most agent skills are written on macOS and assume
@@ -184,21 +184,21 @@ do something else. These raise the floor; they do not guarantee an outcome.
 
 ## Where it pays off, ranked
 
-1. **Multiple agents, one repo.** `new-feature` is close to mandatory here. The
+1. **Multiple agents, one repo.** `worktree-isolation` is close to mandatory here. The
    alternative fails badly.
 2. **Work another person reviews.** Evidence and before/after tables change
    review from an audit into a check.
 3. **UI work.** Screenshots and recordings communicate what a diff cannot.
-4. **Long-lived codebases.** `code-structure` is a bet on repeated change, and
+4. **Long-lived codebases.** `service-layer` is a bet on repeated change, and
    long-lived code collects.
-5. **Anything with your name on it.** `unslop` on every commit message and PR.
+5. **Anything with your name on it.** `prose-cleanup` on every commit message and PR.
 
 ## Where it costs more than it returns
 
 - One-line typo fixes. Go straight to commit.
 - Prototypes you will delete this week.
 - Solo work nobody reviews, where evidence has no audience.
-- Repos without Greptile, for the two greploop skills specifically.
+- Repos without Greptile, for the two code-review-loop skills specifically.
 
 A process you resent is a process you abandon. Run the full four beats on work
 that deserves it and skip to the useful skill otherwise. `AGENTS.md` describes

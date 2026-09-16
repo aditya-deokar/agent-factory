@@ -1,5 +1,5 @@
 ---
-name: windows-shell
+name: cross-platform-shell
 description: Write commands and scripts that actually run on Windows. Use when working on a Windows machine, when a command fails with "is not recognized as the name of a cmdlet", when a bash one-liner needs a PowerShell equivalent, when paths break on backslashes or spaces, or when making a repo's scripts work on Windows, macOS, and Linux at once.
 license: MIT
 compatibility: Targets Windows 10 and 11 with Windows PowerShell 5.1 or PowerShell 7+. Notes where Git Bash and WSL behave differently. The POSIX halves of each comparison assume bash and coreutils.
@@ -9,7 +9,7 @@ metadata:
 allowed-tools: Bash(*)
 ---
 
-# Windows shell
+# Cross-platform shell
 
 Most agent skills are written by people on macOS and assume bash, coreutils,
 and forward slashes. On Windows those assumptions fail quietly or loudly, and

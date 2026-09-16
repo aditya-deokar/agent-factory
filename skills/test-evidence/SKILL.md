@@ -1,5 +1,5 @@
 ---
-name: evidence-driven-testing
+name: test-evidence
 description: >
   Produce a checkable artifact that a change works, instead of asserting it in
   prose. Use whenever a claim about behavior needs backing: before opening a PR,
@@ -20,7 +20,7 @@ metadata:
 allowed-tools: Bash(python*) Bash(ffmpeg*) Bash(ffprobe*) Bash(gh pr*) Bash(gh issue*) Bash(npx playwright*)
 ---
 
-# Evidence-driven testing
+# Test evidence
 
 "I tested it and it works" is not a result. It is a request to be trusted, and
 it puts the verification back on the reader, who now has to read the diff you
@@ -59,7 +59,7 @@ shows you performing the test, so what the reviewer watches is the test itself,
 not a demo of the happy path.
 
 ```bash
-REC="skills/evidence-driven-testing/scripts/record.py"
+REC="skills/test-evidence/scripts/record.py"
 
 python "$REC" doctor                         # once per machine
 python "$REC" start --label "Cart totals with tax"
@@ -136,7 +136,7 @@ For flows rather than single pages, write a short script that walks the steps
 and shoots at each one. Commit it. A committed capture script is evidence that
 regenerates itself on the next change.
 
-Hand the pair to `before-and-after` for a PR-ready table.
+Hand the pair to `visual-diff` for a PR-ready table.
 
 ## Changes with no visible surface
 
@@ -174,7 +174,7 @@ gh pr comment <number> --body-file .artifacts/evidence/session/report.md
 
 Video cannot be uploaded through the `gh` CLI. Drag `evidence.mp4` into the PR
 comment box in the browser, which uploads it to GitHub's CDN, and paste the
-resulting URL. Images can go through `before-and-after --markdown`, which
+resulting URL. Images can go through `visual-diff --markdown`, which
 uploads and prints the table.
 
 Structure the PR body so a reviewer sees the proof before the explanation:

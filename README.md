@@ -28,30 +28,30 @@ that enforces it; drop it into any repo alongside the skills.
 
 | Beat | Skill | What you get |
 |---|---|---|
-| Isolate | `new-feature` | A worktree and branch per task. Parallel agents stop colliding. |
-| Build | `code-structure` | Actions own the why, services own the how. One fix propagates everywhere. |
-| Prove | `evidence-driven-testing` | A recording of the test being run, annotated and attached. |
-| Ship | `before-and-after`, `greploop` | Before/after table in the PR, iterated to a clean review. |
+| Isolate | `worktree-isolation` | A worktree and branch per task. Parallel agents stop colliding. |
+| Build | `service-layer` | Actions own the why, services own the how. One fix propagates everywhere. |
+| Prove | `test-evidence` | A recording of the test being run, annotated and attached. |
+| Ship | `visual-diff`, `code-review-loop` | Before/after table in the PR, iterated to a clean review. |
 
-`unslop` runs across everything a person will read, at every beat.
+`prose-cleanup` runs across everything a person will read, at every beat.
 
 ## All ten skills
 
 ### Workflow
 
-- **[new-feature](skills/new-feature/SKILL.md)** - A branch alone does not
+- **[worktree-isolation](skills/worktree-isolation/SKILL.md)** - A branch alone does not
   isolate anything; two agents in one checkout interleave edits regardless. Sets
   up a worktree per task, checks for overlap with work already in flight before
   starting, and covers what worktrees do *not* isolate: ports, databases,
   lockfiles, global config.
 
-- **[code-structure](skills/code-structure/SKILL.md)** - Two questions decide
+- **[service-layer](skills/service-layer/SKILL.md)** - Two questions decide
   where code lives: would it change if the product rules changed, or if the
   vendor changed. Boundaries own the first, services own the second. Ships an
   ordered extraction procedure you can stop partway through, and the five ways
   it usually goes wrong.
 
-- **[evidence-driven-testing](skills/evidence-driven-testing/SKILL.md)** -
+- **[test-evidence](skills/test-evidence/SKILL.md)** -
   Replace "I tested it and it works" with an artifact. The bundled recorder
   (`scripts/record.py`) captures the session while the agent drives the app,
   burns timestamped pass/fail annotations into `evidence.mp4`, and writes a
@@ -61,38 +61,38 @@ that enforces it; drop it into any repo alongside the skills.
 
 ### Shipping
 
-- **[before-and-after](skills/before-and-after/SKILL.md)** - Drives the
+- **[visual-diff](skills/visual-diff/SKILL.md)** - Drives the
   `@vercel/before-and-after` CLI to produce a PR-ready `| Before | After |`
   table from two URLs, two images, or a mix.
 
-- **[greploop](skills/greploop/SKILL.md)** - Iterates a PR, MR, or shelved
+- **[code-review-loop](skills/code-review-loop/SKILL.md)** - Iterates a PR, MR, or shelved
   changelist until Greptile gives 5/5 confidence with zero unresolved comments.
   Triggers the review, fixes actionable comments, resolves threads, pushes,
   repeats, up to `--max-iterations` (default 10).
 
-- **[greploop-apps](skills/greploop-apps/SKILL.md)** - The same loop, triggered
+- **[code-review-loop-large](skills/code-review-loop-large/SKILL.md)** - The same loop, triggered
   by tagging `@greptile-apps`, which bypasses the file-count limit that makes
-  Greptile refuse huge PRs. Use when greploop gets "Too many files changed for
+  Greptile refuse huge PRs. Use when code-review-loop gets "Too many files changed for
   review".
 
 ### Craft
 
-- **[unslop](skills/unslop/SKILL.md)** - Cuts AI tells from anything a person
+- **[prose-cleanup](skills/prose-cleanup/SKILL.md)** - Cuts AI tells from anything a person
   will read. Names 31 patterns (puffery, filler, hedging, chatbot phrases, em
   dashes, colons as connectors, bold and emoji overuse, abstract metaphor
   nouns, passive voice) and applies them as a four-step loop.
 
-- **[skill-forge](skills/skill-forge/SKILL.md)** - Write and audit skills that
+- **[skill-authoring](skills/skill-authoring/SKILL.md)** - Write and audit skills that
   actually load. Covers trigger-focused descriptions, the frontmatter fields
   that matter, the layout the CLI discovers, and a debugging order for a skill
   that never fires.
 
-- **[release-train](skills/release-train/SKILL.md)** - Cut and publish a
+- **[package-release](skills/package-release/SKILL.md)** - Cut and publish a
   versioned release. Semver rules specific to skills, a pre-publish audit, npm
   scoped publishing, GitHub releases, and what rollback actually looks like
   when npm will not let you republish a version.
 
-- **[windows-shell](skills/windows-shell/SKILL.md)** - Commands that run on
+- **[cross-platform-shell](skills/cross-platform-shell/SKILL.md)** - Commands that run on
   Windows. PowerShell 5.1 traps, a POSIX translation table, path and
   line-ending rules, and why `npx skills add --copy` is the fix when symlinks
   fail.
@@ -107,7 +107,7 @@ npx skills add aditya-deokar/software-factory
 npx skills add aditya-deokar/software-factory --global
 
 # Pick specific skills
-npx skills add aditya-deokar/software-factory --skill new-feature --skill unslop
+npx skills add aditya-deokar/software-factory --skill worktree-isolation --skill prose-cleanup
 
 # Target specific agents
 npx skills add aditya-deokar/software-factory -a claude-code -a cursor
@@ -131,7 +131,7 @@ Full walkthrough in [docs/USAGE.md](docs/USAGE.md).
 ## Use one without installing
 
 ```bash
-npx skills use aditya-deokar/software-factory@unslop | claude
+npx skills use aditya-deokar/software-factory@prose-cleanup | claude
 ```
 
 ## Documentation
@@ -160,8 +160,8 @@ The linter runs on `prepublishOnly`, so a broken skill cannot reach npm.
 
 Seven skills are original work under the root MIT license, which also covers the
 packaging, `scripts/`, and the docs. Three are vendored and keep their upstream
-licenses in their own folders: `greploop` and `greploop-apps` (MIT, Greptile),
-`unslop` (MIT, Cursor), and `before-and-after` (PolyForm Shield 1.0.0, Vercel
+licenses in their own folders: `code-review-loop` and `code-review-loop-large` (MIT, Greptile),
+`prose-cleanup` (MIT, Cursor), and `visual-diff` (PolyForm Shield 1.0.0, Vercel
 Labs, which is source-available rather than open source).
 
 [NOTICE.md](NOTICE.md) records the origin of every skill and what was changed
@@ -169,9 +169,9 @@ from upstream.
 
 ## Credits
 
-`before-and-after` from [vercel-labs](https://github.com/vercel-labs/before-and-after),
-`greploop` from [greptileai](https://github.com/greptileai/skills), `unslop`
+`visual-diff` from [vercel-labs](https://github.com/vercel-labs/before-and-after),
+`code-review-loop` from [greptileai](https://github.com/greptileai/skills), `prose-cleanup`
 from [cursor](https://github.com/cursor/plugins). The subject matter of
-`code-structure`, `new-feature`, and `evidence-driven-testing` was prompted by
+`service-layer`, `worktree-isolation`, and `test-evidence` was prompted by
 [michaelshimeles/skills](https://github.com/michaelshimeles/skills); the skills
 here were written from scratch.

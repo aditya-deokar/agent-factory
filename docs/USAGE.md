@@ -48,7 +48,7 @@ through GitHub.
 npx skills add "C:\Users\adity\Documents\Software Factory" --global
 ```
 
-Symlink mode means editing `skills/unslop/SKILL.md` changes the installed skill
+Symlink mode means editing `skills/prose-cleanup/SKILL.md` changes the installed skill
 immediately.
 
 ## Wire up the workflow
@@ -99,7 +99,7 @@ What the four beats look like in practice.
 
 ### 1. Isolate
 
-You ask for a fix. Before writing code the agent runs `new-feature`: fetches
+You ask for a fix. Before writing code the agent runs `worktree-isolation`: fetches
 origin, checks open PRs for overlapping files, and creates a worktree on a
 branch off `origin/main`.
 
@@ -113,7 +113,7 @@ written into the skill.
 
 ### 2. Build
 
-`code-structure` fires when the agent notices the same operational logic in two
+`service-layer` fires when the agent notices the same operational logic in two
 places. It pushes toward one split: actions own the why and when, services own
 the how.
 
@@ -126,7 +126,7 @@ one caller stays where it is. Premature service extraction is its own mess.
 
 ### 3. Prove
 
-`evidence-driven-testing` is the beat that changes what you get. The agent
+`test-evidence` is the beat that changes what you get. The agent
 starts the recorder, drives the app through each test case by hand via computer
 use, annotates assertions as it goes, and stops the recorder. Out comes
 `evidence.mp4` with annotations burned in, a `report.md`, and a `manifest.json`.
@@ -144,7 +144,7 @@ The recorder needs Python 3 and FFmpeg with `libx264` and the `ass` filter.
 Check before you rely on it:
 
 ```bash
-python skills/evidence-driven-testing/scripts/record.py doctor
+python skills/test-evidence/scripts/record.py doctor
 ```
 
 On Windows it uses `gdigrab` and needs no extra permissions. macOS needs Screen
@@ -152,21 +152,21 @@ Recording permission granted to the terminal.
 
 ### 4. Ship
 
-`before-and-after` turns two URLs or two PNGs into a markdown table and uploads
+`visual-diff` turns two URLs or two PNGs into a markdown table and uploads
 the images.
 
 ```bash
-before-and-after http://localhost:3000/pricing https://myapp.com/pricing --markdown
+visual-diff http://localhost:3000/pricing https://myapp.com/pricing --markdown
 ```
 
 Default upload host is 0x0.st, which is public. Fine for a marketing page,
 wrong for anything with customer data on screen. Pass `--upload-url` or switch
 to the gist adapter for those.
 
-Then `greploop` runs the review cycle: trigger Greptile, fix actionable
+Then `code-review-loop` runs the review cycle: trigger Greptile, fix actionable
 comments, resolve threads, push, repeat until 5/5 with zero unresolved
 comments, capped at `--max-iterations` (default 10). On a PR too large for
-Greptile's file limit, `greploop-apps` does the same thing through a different
+Greptile's file limit, `code-review-loop-large` does the same thing through a different
 trigger.
 
 Both need Greptile installed on the repo. Without it neither skill has anything
@@ -176,31 +176,31 @@ to talk to.
 
 Most of these stand alone.
 
-**`unslop` on a commit message or PR body.** The one with the highest
+**`prose-cleanup` on a commit message or PR body.** The one with the highest
 frequency. It catches em dashes, "delve", "leverage", bold-label lists, and the
 other 27 tells.
 
 ```bash
-npx skills use aditya-deokar/software-factory@unslop | claude
+npx skills use aditya-deokar/software-factory@prose-cleanup | claude
 ```
 
-**`windows-shell` when a command fails.** "is not recognized as the name of a
+**`cross-platform-shell` when a command fails.** "is not recognized as the name of a
 cmdlet" usually means a bash one-liner hit PowerShell. The skill has the
 translation table and the 5.1 traps, including that `&&` is a parser error, not
 a runtime one.
 
-**`skill-forge` when writing a skill.** Also the right thing to read when a
+**`skill-authoring` when writing a skill.** Also the right thing to read when a
 skill is installed but never fires. That is nearly always the description, not
 the body.
 
-**`release-train` when publishing.** Semver rules for skills, the pre-publish
+**`package-release` when publishing.** Semver rules for skills, the pre-publish
 audit, and what rollback means when npm will not let you republish a version.
 
 ## Keeping them current
 
 ```bash
 npx skills update                    # everything
-npx skills update unslop             # one skill
+npx skills update prose-cleanup             # one skill
 npx skills list                      # what is installed and where
 npx skills remove <name>             # drop one
 ```
@@ -212,17 +212,17 @@ Symlinked installs track the source automatically. Copied installs need
 
 **A skill never fires.** Confirm it is installed with `npx skills list`. If it
 is there, the description is the problem: it probably describes what the skill
-does instead of naming the situation that triggers it. `skill-forge` has the
+does instead of naming the situation that triggers it. `skill-authoring` has the
 debugging order.
 
-**Two skills fight.** `greploop` and `greploop-apps` have 80% description
+**Two skills fight.** `code-review-loop` and `code-review-loop-large` have 80% description
 overlap by design, since they are variants of one loop. If the agent picks the
 wrong one, name it explicitly. The linter flags any new pair that overlaps this
 much, which is usually a mistake rather than a design choice.
 
 **Install fails on Windows.** Symlinks. Use `--copy` or enable Developer Mode.
 
-**`before-and-after` cannot find its scripts.** Older versions told the agent to
+**`visual-diff` cannot find its scripts.** Older versions told the agent to
 run `./scripts/upload-and-copy.sh`, which resolves against your project instead
 of the skill folder. Fixed here; the skill resolves its own directory first.
 
@@ -242,6 +242,6 @@ The four-beat workflow adds real time per task. The worktree setup, the
 recording, the review loop: each costs minutes. It pays off on work that gets
 reviewed by someone else, touches a UI, or runs in parallel with other agents.
 
-For a one-line typo fix in a README, skip to `unslop` and commit. Running the
+For a one-line typo fix in a README, skip to `prose-cleanup` and commit. Running the
 full workflow on trivial changes is how a good process becomes something you
 resent and then abandon.

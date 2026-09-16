@@ -1,5 +1,5 @@
 ---
-name: unslop
+name: prose-cleanup
 description: Cut AI tells from text you write or edit for a human reader (commit messages, PR titles and bodies, docs, code comments, replies). Apply before committing, posting, or sending; leave prose you didn't touch alone.
 license: MIT
 compatibility: No tools or runtime required. Pure editing guidance, applies in any harness.
@@ -9,7 +9,7 @@ metadata:
   version: "1.1"
 ---
 
-# Unslop
+# Prose cleanup
 
 Edit text to remove AI patterns and add human voice.
 

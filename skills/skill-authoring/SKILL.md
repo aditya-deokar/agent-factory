@@ -1,5 +1,5 @@
 ---
-name: skill-forge
+name: skill-authoring
 description: Write, audit, and fix agent skills so they load in every harness and survive review. Use when creating a new SKILL.md, when a skill is not being invoked or not discovered, when frontmatter fails validation, or before publishing a skills repo to npm or skills.sh.
 license: MIT
 compatibility: Requires Node.js 18+ for the validator (npx skills add --list). Everything else is plain file editing and works in any harness.
@@ -9,7 +9,7 @@ metadata:
 allowed-tools: Bash(npx skills *) Bash(node:*) Bash(git:*)
 ---
 
-# Skill forge
+# Skill authoring
 
 A skill is a folder with a `SKILL.md` inside it. The folder name and the
 frontmatter `name` must match, and the description decides whether the agent

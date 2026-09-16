@@ -1,5 +1,5 @@
 ---
-name: new-feature
+name: worktree-isolation
 description: >
   Set up an isolated branch and working directory before touching any code, so
   concurrent agents and sessions cannot corrupt each other's work. Use before
@@ -18,7 +18,7 @@ metadata:
 allowed-tools: Bash(git:*) Bash(gh pr list*) Bash(gh pr diff*) Bash(lsof:*) Bash(netstat:*)
 ---
 
-# New feature
+# Worktree isolation
 
 Before the first edit, you need two things: a branch nobody else is on, and a
 directory nobody else is writing to. A branch alone is not enough. Two agents

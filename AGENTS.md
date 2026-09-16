@@ -7,27 +7,27 @@ callouts; it also governs work in this repo itself.
 
 ## Workflow
 
-1. **Isolate — `/new-feature`.** Every new feature starts in a fresh Git
+1. **Isolate — `/worktree-isolation`.** Every new feature starts in a fresh Git
    worktree branched from `origin/main` so agents can work in parallel
    without conflicts. Never build on `main`.
-2. **Build — `/code-structure`.** Write code to the service-layer
+2. **Build — `/service-layer`.** Write code to the service-layer
    architecture: actions/boundaries orchestrate the "why/when", a service
    layer owns the reusable "how", with explicit inputs and structured
    returns.
-3. **Prove — `/evidence-driven-testing`.** Verify with the repo's checks
+3. **Prove — `/test-evidence`.** Verify with the repo's checks
    plus runtime evidence. Capture the **before** state while reproducing the
    issue — prior to fixing it, when it is cheapest — and the **after** once
    the change works.
-4. **Ship — `/before-and-after`, then `/greploop`.** Open the PR with
+4. **Ship — `/visual-diff`, then `/code-review-loop`.** Open the PR with
    before/after proof embedded in the description (screenshot or video
    whenever the change has a visible surface; measured numbers or output
-   pairs when it doesn't). Run `/greploop` — or `/greploop-apps` when the PR
+   pairs when it doesn't). Run `/code-review-loop` — or `/code-review-loop-large` when the PR
    exceeds Greptile's file-count limit — until Greptile reports **5/5 with
    zero unresolved comments**. Finish by presenting the PR URL.
 
 Ship-beat notes:
 
-- `/before-and-after` drives the `@vercel/before-and-after` CLI. `--markdown`
+- `/visual-diff` drives the `@vercel/before-and-after` CLI. `--markdown`
   uploads the pair and prints a PR-ready table; it also accepts existing
   PNGs, so evidence gathered while developing can be reused as-is.
 - In containers/VMs where Chrome fails with "No usable sandbox", set
@@ -37,7 +37,7 @@ Ship-beat notes:
 
 ## Writing for humans
 
-Run `/unslop` over anything a person will read, before you commit, post, or
+Run `/prose-cleanup` over anything a person will read, before you commit, post, or
 send it: commit messages, the PR title and body, README and doc edits, code
 comments, and the closing reply. It strips AI tells (em dashes, filler,
 hedging, chatbot phrases, puffery, bold-label lists) and replaces fancy
@@ -72,8 +72,8 @@ wrote or changed, not to prose you didn't touch.
    branch, `--force-with-lease`).
 6. Open the PR. The body must explain what changed, how it was tested (every
    claim backed by evidence), before/after proof, and any risks or follow-up
-   work. Run the title and body through `/unslop` before posting.
-7. Run `/greploop` (or `/greploop-apps`) until **5/5 with zero unresolved
+   work. Run the title and body through `/prose-cleanup` before posting.
+7. Run `/code-review-loop` (or `/code-review-loop-large`) until **5/5 with zero unresolved
    comments**.
 8. End by presenting the PR URL.
 
@@ -94,10 +94,10 @@ Install with `npx skills add aditya-deokar/software-factory`.
 
 | Skill | Origin |
 |---|---|
-| `new-feature`, `code-structure`, `evidence-driven-testing`, `skill-forge`, `release-train`, `windows-shell` | written for this package |
-| `before-and-after` | vendored from [vercel-labs/before-and-after](https://github.com/vercel-labs/before-and-after), PolyForm Shield 1.0.0 |
-| `greploop`, `greploop-apps` | vendored from [greptileai/skills](https://github.com/greptileai/skills), MIT |
-| `unslop` | vendored from [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack/skills/unslop), MIT; frontmatter edited so agents apply it unprompted, body untouched |
+| `worktree-isolation`, `service-layer`, `test-evidence`, `skill-authoring`, `package-release`, `cross-platform-shell` | written for this package |
+| `visual-diff` | vendored from [vercel-labs/before-and-after](https://github.com/vercel-labs/before-and-after), PolyForm Shield 1.0.0 |
+| `code-review-loop`, `code-review-loop-large` | vendored from [greptileai/skills](https://github.com/greptileai/skills), MIT |
+| `prose-cleanup` | vendored from [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack/skills/unslop), MIT; frontmatter edited so agents apply it unprompted, body untouched |
 
 License and attribution detail for each one is in [NOTICE.md](NOTICE.md).
 
@@ -105,8 +105,8 @@ License and attribution detail for each one is in [NOTICE.md](NOTICE.md).
 
 These are not part of the four beats. Reach for them when the situation calls.
 
-- **`/skill-forge`** when writing or debugging a skill, especially one that is
+- **`/skill-authoring`** when writing or debugging a skill, especially one that is
   installed but never fires.
-- **`/release-train`** when cutting a version of a skills package.
-- **`/windows-shell`** when a command fails on Windows, or when making a repo's
+- **`/package-release`** when cutting a version of a skills package.
+- **`/cross-platform-shell`** when a command fails on Windows, or when making a repo's
   scripts run on Linux, macOS, and Windows at once.

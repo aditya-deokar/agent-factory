@@ -1,5 +1,5 @@
 ---
-name: greploop
+name: code-review-loop
 description: >
   Iteratively improves a PR (GitHub), MR (GitLab), or shelved changelist (Perforce) until Greptile
   gives it a 5/5 confidence score with zero unresolved comments. Triggers Greptile review, fixes all
@@ -14,7 +14,7 @@ metadata:
 allowed-tools: Bash(gh:*) Bash(glab:*) Bash(git:*) Bash(p4:*)
 ---
 
-# Greploop
+# Code review loop
 
 Iteratively fix a PR/MR/CL until Greptile gives a perfect review: 5/5 confidence, zero unresolved comments.
 
@@ -155,7 +155,7 @@ while true; do
 done
 ```
 
-If polling times out, stop the greploop workflow and report the timeout. Do not continue with stale or missing review results.
+If polling times out, stop the code-review-loop workflow and report the timeout. Do not continue with stale or missing review results.
 
 **GitLab** — check if Greptile is already running before posting a trigger comment:
 
@@ -221,7 +221,7 @@ while true; do
 done
 ```
 
-If polling times out, stop the greploop workflow and report the timeout. Do not continue with stale or missing review results.
+If polling times out, stop the code-review-loop workflow and report the timeout. Do not continue with stale or missing review results.
 
 #### B. Fetch Greptile review results
 
@@ -386,7 +386,7 @@ Repeat for each unresolved discussion ID. (GitLab has no batch resolution — lo
 **GitHub/GitLab:**
 ```bash
 git add -A
-git commit -m "address greptile review feedback (greploop iteration N)"
+git commit -m "address greptile review feedback (code-review-loop iteration N)"
 git push
 ```
 

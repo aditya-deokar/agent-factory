@@ -1,6 +1,6 @@
 # GitLab API Reference
 
-Useful GitLab REST API calls for the greploop workflow, using `glab api`.
+Useful GitLab REST API calls for the code-review-loop workflow, using `glab api`.
 
 `glab api` automatically resolves `:fullpath` to the URL-encoded project path from the local git remote.
 

@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "skills" / "evidence-driven-testing" / "scripts" / "record.py"
+SCRIPT = ROOT / "skills" / "test-evidence" / "scripts" / "record.py"
 
 spec = importlib.util.spec_from_file_location("record", SCRIPT)
 record = importlib.util.module_from_spec(spec)

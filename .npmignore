@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.artifacts/
+.github/
+docs/
+scripts/
+tests/
+*.tgz
+.env
+.env.local
