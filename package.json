@@ -1,0 +1,47 @@
+{
+  "name": "@software-factory/skills",
+  "version": "1.0.0",
+  "description": "Agent skills for shipping software with proof: isolate, build, prove, ship. Works with Claude Code, Cursor, Codex, Copilot, and 75 more agents.",
+  "keywords": [
+    "agent-skills",
+    "skills",
+    "claude-code",
+    "cursor",
+    "codex",
+    "github-copilot",
+    "ai-agents",
+    "code-review",
+    "worktree",
+    "evidence-driven-testing"
+  ],
+  "homepage": "https://github.com/aditya-deokar/software-factory#readme",
+  "bugs": {
+    "url": "https://github.com/aditya-deokar/software-factory/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aditya-deokar/software-factory.git"
+  },
+  "license": "MIT",
+  "author": "Aditya Deokar",
+  "type": "module",
+  "files": [
+    "skills/",
+    "AGENTS.md",
+    "NOTICE.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "lint": "node scripts/lint-skills.mjs",
+    "list": "npx skills add . --list",
+    "test": "node scripts/lint-skills.mjs && python -m pytest tests/ -q",
+    "prepublishOnly": "node scripts/lint-skills.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

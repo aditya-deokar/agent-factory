@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint skills
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate frontmatter and layout
+        run: node scripts/lint-skills.mjs
+
+  discover:
+    name: Discovery (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # The skills CLI is what users actually run. If it cannot find the
+      # skills, nothing else matters.
+      - name: skills CLI finds every skill
+        env:
+          DISABLE_TELEMETRY: "1"
+        run: npx --yes skills@latest add . --list
+
+  package:
+    name: Package contents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build the tarball
+        run: npm pack --dry-run 2>&1 | tee pack.txt
+      - name: Every vendored skill still ships its LICENSE
+        run: |
+          set -e
+          for d in skills/*/; do
+            name=$(basename "$d")
+            if grep -q 'vendored-from' "$d/SKILL.md"; then
+              test -f "$d/LICENSE" || { echo "::error::$name is vendored but has no LICENSE"; exit 1; }
+              grep -q "skills/$name/LICENSE" pack.txt || { echo "::error::$name LICENSE missing from the npm tarball"; exit 1; }
+            fi
+          done
+          echo "All vendored licenses present in the package."
+      - name: No junk in the tarball
+        run: |
+          set -e
+          for bad in node_modules __pycache__ .git/ .artifacts; do
+            if grep -q "$bad" pack.txt; then echo "::error::$bad leaked into the package"; exit 1; fi
+          done
+          echo "Tarball is clean."
+
+  tests:
+    name: Recorder tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: pip install pytest
+      - run: python -m pytest tests/ -q
