@@ -7,114 +7,80 @@ Everything below assumes the repo root is `C:\Users\adity\Documents\Software Fac
 and that the layout is already correct. It is; `npx skills add . --list` finds
 all ten skills today.
 
-## First, the thing that blocks publishing
+## Provenance, which is settled
 
-Three skills came from
-[michaelshimeles/skills](https://github.com/michaelshimeles/skills), which has
-no LICENSE file. No license means all rights reserved. Forking on GitHub is
-allowed by GitHub's terms; republishing to npm under a different name is not.
+Three skills (`code-structure`, `evidence-driven-testing`, `new-feature`) began
+as copies from [michaelshimeles/skills](https://github.com/michaelshimeles/skills),
+a repository with no license file. No license means all rights reserved, so
+those copies could not legally be republished.
 
-Affected: `code-structure`, `evidence-driven-testing`, `new-feature`.
+All three have been rewritten from scratch. They share no text with the
+originals, only subject matter, which is not protected. The bundled recorder was
+replaced too: the vendored `evidence.py` and its test suite are gone, and
+`scripts/record.py` is an independent implementation with its own session
+format and tests.
 
-You do not have to solve this before pushing to GitHub. You do have to solve it
-before `npm publish`. Options are in [NOTICE.md](../NOTICE.md); the short
-version is ask the author, rewrite the three files, or ship the other seven
-first. Phase 3 is where this gets decided.
+Nothing from that repository remains. npm is unblocked.
 
-The other seven are clear. `greploop`, `greploop-apps`, and `unslop` are MIT
-with their license files intact. `before-and-after` is PolyForm Shield, which
-permits redistribution. `skill-forge`, `release-train`, and `windows-shell`
-were written for this repo.
+The three vendored skills that stay vendored are fine as they are. `greploop`,
+`greploop-apps`, and `unslop` are MIT with their license files intact.
+`before-and-after` is PolyForm Shield, which permits redistribution as long as
+the notice survives, and CI fails the build if it does not.
 
 ---
 
-## Phase 0: what is already done
+## Phase 0: done
 
-- [x] Old git history and the `michaelshimeles/skills` remote removed. A
-      backup tarball sits in the session scratchpad if you ever want it back.
-- [x] Canonical layout: `skills/<name>/SKILL.md` at the repo root, which is the
-      first container directory the CLI walks.
+- [x] Old git history and the upstream remote removed.
+- [x] Canonical layout: `skills/<name>/SKILL.md` at the repo root, the first
+      container directory the CLI walks.
 - [x] All ten skills carry `name`, `description`, `license`, `compatibility`,
       and `metadata`. Vendored ones also carry `metadata.vendored-from`.
 - [x] `scripts/lint-skills.mjs` validates the lot. 0 errors.
 - [x] `npx skills add . --list` reports "Found 10 skills".
+- [x] Three skills rewritten as original work, recorder replaced.
 - [x] `package.json`, `LICENSE`, `NOTICE.md`, `.gitattributes`, CI workflow.
 - [x] Two portability bugs fixed: `before-and-after` resolved scripts against
       the wrong directory once installed, and `new-feature` assumed `lsof`.
+- [x] 26 tests passing (4 more need ffmpeg and run in CI).
 
-## Phase 1: get it into git
+## Phase 1: git
 
-Nothing external yet. Local only, so mistakes are free.
-
-```bash
-cd "C:\Users\adity\Documents\Software Factory"
-git init -b main
-git add -A
-git commit -m "Software Factory skills v1.0.0"
-```
-
-Check before moving on:
-
-```bash
-git log --stat -1        # 10 skills, no .git, no node_modules
-node scripts/lint-skills.mjs
-```
+- [x] `git init`, committed on `master`.
 
 ## Phase 2: GitHub
 
-The repo is the primary distribution channel. `npx skills add` clones from git;
-npm is the secondary path.
+- [x] Pushed to <https://github.com/aditya-deokar/software-factory>.
 
-```bash
-gh repo create aditya-deokar/software-factory --public --source=. --remote=origin
-git push -u origin main
-```
-
-If you would rather not use `gh`, create the repo in the browser and:
-
-```bash
-git remote add origin https://github.com/aditya-deokar/software-factory.git
-git push -u origin main
-```
-
-Then:
+Then, in the repo settings:
 
 - [ ] Set the description to the one-liner from `package.json`.
 - [ ] Add topics: `agent-skills`, `claude-code`, `cursor`, `ai-agents`, `skills`.
-- [ ] Confirm the CI workflow went green. It runs the linter, checks discovery
-      on Linux, macOS, and Windows, and fails if a vendored LICENSE goes
-      missing from the tarball.
+- [ ] Confirm CI went green. It runs the linter, checks discovery on Linux,
+      macOS, and Windows, and fails if a vendored LICENSE goes missing from the
+      tarball.
 
-Verify from a clean directory, the way a stranger would:
+Verify the way a stranger would:
 
 ```bash
 cd "$(mktemp -d)"
 npx skills add aditya-deokar/software-factory --list
 ```
 
-If that prints ten skills, the GitHub half is done. Most people who install
-these will never touch npm.
+Ten skills listed means the GitHub half works. Most people who install these
+will never touch npm.
 
-## Phase 3: resolve the license question
+## Phase 3: make the repo readable
 
-Decide now, before npm. Three paths:
+Nothing here blocks anything. It decides whether a visitor installs.
 
-**Ask.** Open an issue on michaelshimeles/skills asking for an explicit
-license. Cheapest if it works. Costs you a wait of unknown length.
-
-**Rewrite.** Copyright protects expression, not ideas. The service-layer split,
-worktree-per-task, and record-evidence-while-testing are all ideas you are free
-to use. Rewrite the three `SKILL.md` files from scratch without the original
-open beside you. A few hours, and it ends the question permanently. This is the
-one worth doing.
-
-**Ship seven.** Set `metadata.internal: true` on the three, publish the rest,
-add them back once resolved. Internal skills stay installable for you with
-`INSTALL_INTERNAL_SKILLS=1` and stay hidden from everyone else.
-
-- [ ] Path chosen and executed
-- [ ] `NOTICE.md` updated to say what actually happened
-- [ ] Frontmatter `license` on those three now matches reality
+- [ ] The README's first screen has to answer "what is this and why would I
+      install it" without scrolling. It currently does.
+- [ ] Pin the repo on your GitHub profile.
+- [ ] Consider a short demo: a recording made with `record.py` of the four
+      beats running on a real task. This package is about evidence over
+      assertion, and a repo that asserts its own value without showing it is
+      an easy thing to notice.
 
 ## Phase 4: npm
 
@@ -160,8 +126,12 @@ Tag the release:
 
 ```bash
 git tag v1.0.0 && git push --tags
-gh release create v1.0.0 --title "v1.0.0" --generate-notes
 ```
+
+Then create the release at
+<https://github.com/aditya-deokar/software-factory/releases/new>, picking the
+tag you just pushed. (`gh release create v1.0.0 --generate-notes` does the same
+thing once the GitHub CLI is installed; it is not on this machine.)
 
 ## Phase 5: skills.sh
 
@@ -225,23 +195,25 @@ version and publish a patch. There is no overwrite, ever.
 
 ## The whole thing on one page
 
-| Phase | Blocking? | Time | Output |
+| Phase | Status | Time left | Output |
 |---|---|---|---|
-| 1. git init | no | 5 min | Local repo |
-| 2. GitHub | no | 20 min | `npx skills add` works for anyone |
-| 3. License | **yes, for npm** | hours to days | Clean provenance |
-| 4. npm | after 3 | 30 min | `@software-factory/skills` on the registry |
-| 5. skills.sh | after 2 | passive | Directory listing |
+| 0. Prep and rewrites | done | - | Clean provenance, 10 valid skills |
+| 1. git | done | - | Repo on `master` |
+| 2. GitHub | done | 10 min of settings | `npx skills add` works for anyone |
+| 3. Readable repo | open | 30 min | A visitor who installs |
+| 4. npm | open | 30 min | `@software-factory/skills` on the registry |
+| 5. skills.sh | open | passive | Directory listing |
 | 6. Maintenance | ongoing | - | It stays working |
 
-Phases 1, 2, and 5 need nothing from anyone else and can be done today. Phase 4
-waits on phase 3.
+Nothing is blocked. Phase 4 needs an npm org created by hand, which is the only
+step that waits on a web form.
 
 ## Mistakes that cost the most
 
-**Publishing before resolving the license.** npm versions cannot be
+**Publishing before resolving provenance.** npm versions cannot be
 republished. A takedown request after publishing means deprecating a version
-that stays in the registry forever with your name on it.
+that stays in the registry forever with your name on it. This is why the three
+skills were rewritten before the first publish rather than after.
 
 **A stale README.** Install commands with the wrong owner or package name is
 the single most common broken thing in skills repos. CI does not catch it. Read

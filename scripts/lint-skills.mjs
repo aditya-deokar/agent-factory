@@ -31,6 +31,20 @@ function parseFrontmatter(raw, skill) {
     return { fields: {}, body: raw };
   }
   const block = m[1];
+
+  // A plain scalar containing ": " is ambiguous YAML. Real parsers reject it,
+  // and the skill then vanishes from discovery with no error shown anywhere.
+  // Block scalars (>) and quoted values are fine.
+  for (const [i, line] of block.split(/\r?\n/).entries()) {
+    const kv = line.match(/^ *([A-Za-z0-9_-]+):[ \t]+(.+)$/);
+    if (!kv) continue;
+    const value = kv[2].trim();
+    if (/^[>|]/.test(value)) continue;                      // block scalar
+    if (/^["'].*["']$/.test(value)) continue;               // fully quoted
+    if (/^[[{]/.test(value)) continue;                      // flow collection
+    if (/: /.test(value))
+      err(skill, `frontmatter line ${i + 1} ("${kv[1]}") has an unquoted ": " - use a > block scalar or quote it`);
+  }
   const body = raw.slice(m[0].length);
   const fields = {};
   const lines = block.split(/\r?\n/);

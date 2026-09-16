@@ -39,24 +39,25 @@ that enforces it; drop it into any repo alongside the skills.
 
 ### Workflow
 
-- **[new-feature](skills/new-feature/SKILL.md)** - Start every task in a Git
-  worktree branched from `origin/main`. Covers unique naming, a scope check
-  against open PRs, fresh dependency installs, and cleanup after merge.
-  Includes harness deltas for Claude Code and Cursor, which manage worktrees
-  themselves.
+- **[new-feature](skills/new-feature/SKILL.md)** - A branch alone does not
+  isolate anything; two agents in one checkout interleave edits regardless. Sets
+  up a worktree per task, checks for overlap with work already in flight before
+  starting, and covers what worktrees do *not* isolate: ports, databases,
+  lockfiles, global config.
 
-- **[code-structure](skills/code-structure/SKILL.md)** - Service layer
-  architecture. Actions orchestrate domain rules, a service layer centralizes
-  reusable mechanics. Ships a migration checklist for extracting shared logic
-  safely and a table of anti-patterns (god services, leaky services,
-  over-abstraction).
+- **[code-structure](skills/code-structure/SKILL.md)** - Two questions decide
+  where code lives: would it change if the product rules changed, or if the
+  vendor changed. Boundaries own the first, services own the second. Ships an
+  ordered extraction procedure you can stop partway through, and the five ways
+  it usually goes wrong.
 
-- **[evidence-driven-testing](skills/evidence-driven-testing/SKILL.md)** - The
-  agent drives the app live via computer use while a bundled recorder captures
-  the session, timestamps each assertion, burns them into `evidence.mp4`, and
-  posts the video plus a summary to the PR. Headless environments fall back to
-  scripted screenshots; non-UI changes still produce evidence as measured
-  numbers and output pairs.
+- **[evidence-driven-testing](skills/evidence-driven-testing/SKILL.md)** -
+  Replace "I tested it and it works" with an artifact. The bundled recorder
+  (`scripts/record.py`) captures the session while the agent drives the app,
+  burns timestamped pass/fail annotations into `evidence.mp4`, and writes a
+  report. Headless environments fall back to scripted screenshots; changes with
+  no visible surface still produce evidence as measured numbers and output
+  pairs.
 
 ### Shipping
 
@@ -157,18 +158,20 @@ The linter runs on `prepublishOnly`, so a broken skill cannot reach npm.
 
 ## Licensing
 
-The root MIT license covers the packaging, `scripts/`, the docs, and the skills
-authored here. Vendored skills keep their upstream licenses in their own
-folders. `before-and-after` is PolyForm Shield 1.0.0, which is source-available
-rather than open source.
+Seven skills are original work under the root MIT license, which also covers the
+packaging, `scripts/`, and the docs. Three are vendored and keep their upstream
+licenses in their own folders: `greploop` and `greploop-apps` (MIT, Greptile),
+`unslop` (MIT, Cursor), and `before-and-after` (PolyForm Shield 1.0.0, Vercel
+Labs, which is source-available rather than open source).
 
-Three skills (`code-structure`, `evidence-driven-testing`, `new-feature`) came
-from a repository with no license file and need their provenance resolved
-before publishing. [NOTICE.md](NOTICE.md) explains the options.
+[NOTICE.md](NOTICE.md) records the origin of every skill and what was changed
+from upstream.
 
 ## Credits
 
-Built on work by [michaelshimeles](https://github.com/michaelshimeles/skills),
-[vercel-labs](https://github.com/vercel-labs/before-and-after),
-[greptileai](https://github.com/greptileai/skills), and
-[cursor](https://github.com/cursor/plugins).
+`before-and-after` from [vercel-labs](https://github.com/vercel-labs/before-and-after),
+`greploop` from [greptileai](https://github.com/greptileai/skills), `unslop`
+from [cursor](https://github.com/cursor/plugins). The subject matter of
+`code-structure`, `new-feature`, and `evidence-driven-testing` was prompted by
+[michaelshimeles/skills](https://github.com/michaelshimeles/skills); the skills
+here were written from scratch.

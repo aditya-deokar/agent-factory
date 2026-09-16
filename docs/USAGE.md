@@ -144,7 +144,7 @@ The recorder needs Python 3 and FFmpeg with `libx264` and the `ass` filter.
 Check before you rely on it:
 
 ```bash
-python3 skills/evidence-driven-testing/scripts/evidence.py doctor
+python skills/evidence-driven-testing/scripts/record.py doctor
 ```
 
 On Windows it uses `gdigrab` and needs no extra permissions. macOS needs Screen
@@ -232,9 +232,9 @@ of the skill folder. Fixed here; the skill resolves its own directory first.
 export AGENT_BROWSER_ARGS="--no-sandbox"
 ```
 
-**The recorder produces nothing.** Run `evidence.py doctor`. It reports both the
-FFmpeg build and the capture source. Missing `libx264` or the `ass` filter is
-the usual answer, and the fix is a different FFmpeg build, not a flag.
+**The recorder produces nothing.** Run `record.py doctor`. It names the missing
+piece rather than making you guess. Missing `libx264` or the `ass` filter is the
+usual answer, and the fix is a different FFmpeg build, not a flag.
 
 ## What to expect honestly
 

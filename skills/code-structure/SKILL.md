@@ -1,121 +1,221 @@
 ---
 name: code-structure
-description: Use when multiple workflows duplicate the same operational logic, when deciding what belongs in actions vs shared services, or when refactoring repeated operational blocks across domain flows. Use when adding new features that share mechanics with existing ones.
+description: >
+  Decide whether code belongs in an orchestration boundary or a shared service,
+  and extract shared mechanics safely. Use when the same operational logic
+  appears in more than one workflow, when a bug fixed in one flow is still live
+  in another doing the same thing, when a route handler has grown past its own
+  domain rules, or when adding a feature whose plumbing already exists elsewhere.
 license: MIT
-compatibility: Language-agnostic guidance. Examples are TypeScript, but the two-layer split applies to any codebase with an orchestration boundary (HTTP handlers, server actions, CLI commands, job runners).
+compatibility: >
+  Language-agnostic. Examples are TypeScript, but the split applies to any
+  codebase with an entry point that receives requests and a body of logic behind
+  it, including HTTP handlers, server actions, CLI commands, queue consumers,
+  and cron jobs.
 metadata:
   author: software-factory
-  version: "1.1"
+  version: "2.0"
 ---
 
-# Service Layer Architecture
+# Code structure
 
-## Overview
+Two questions decide where a piece of code lives.
 
-**Two-layer separation:** Actions orchestrate domain rules (the "why/when"), while a service layer centralizes reusable operational mechanics (the "how").
+**Would this change if the product rules changed?** If yes, it belongs at the
+boundary. Who is allowed to do this, when it is allowed, what happens on
+failure, which state transition follows: all of that is product.
 
-This prevents duplicated code, inconsistent behavior, and bugs fixed in one path but not others.
+**Would this change if the vendor changed?** If yes, it belongs in a service.
+Retry counts, SDK calls, connection handling, payload shapes, polling until
+ready: all of that is mechanism.
 
-## When to Use
+Code that answers yes to both is doing two jobs and should be split.
 
-- Multiple callers need the same low-level operation (sandbox creation, email sending, payment processing)
-- You're copy-pasting operational logic between action files
-- A bug fix in one workflow doesn't propagate to others doing the same thing
-- Adding a new feature that shares mechanics with existing flows
+## Why it matters
 
-**Don't use when:** Logic is truly domain-specific and used by only one caller.
+The symptom that brings people here is a bug fixed in one place and still live
+in two others. Three routes each build their own Stripe customer payload. One
+of them gets a fix for a missing idempotency key. The other two do not, because
+nothing connected them.
 
-## Core Pattern
+Centralising the mechanism means the next fix lands everywhere at once. That is
+the entire payoff. Everything below is in service of it.
+
+## The shape
 
 ```
-Orchestration Layer (Actions)          Service Layer (Shared Mechanics)
-├── owns business rules                ├── owns reusable operations
-├── owns state transitions             ├── owns provider/SDK interactions
-├── owns auth/ownership checks         ├── owns command execution details
-├── owns failure classification        ├── owns health checks / readiness
-├── owns retries / user-facing errors  └── returns structured results
-└── calls service functions
+Boundary                          Service
+─────────────────────────────     ─────────────────────────────
+authenticates the caller          talks to the vendor or driver
+checks permission                 retries and backs off
+decides whether to act            polls until ready
+picks the arguments               validates its own inputs
+interprets the result             returns a structured result
+maps failure to a response        raises typed errors
+writes the state transition       never touches app state
 ```
 
-**Rule of thumb:**
-- "What this product flow means" → keep in actions
-- "How to do this operation reliably" → move to service layer
+The line is one-way. A boundary calls a service. A service never calls a
+boundary, never reads the session, never writes the domain tables, and never
+decides whether an action was allowed.
 
-## Quick Reference
+When a service starts needing to know who the user is, the design has drifted.
+Pass what it needs as an argument instead.
 
-| Design Principle | Do | Don't |
-|---|---|---|
-| API shape | Composable capability blocks | One giant "do everything" method |
-| Inputs/outputs | Explicit params, structured returns | Hidden global state, reaching into DB |
-| Migration | Extract one block, replace one caller, verify, then migrate rest | Refactor everything at once |
-| Domain logic | Keep auth, policy, error classification in actions | Let service mutate domain state directly |
-| Extraction trigger | Logic repeated across 2+ callers | Logic used once (over-abstraction) |
+## What a service function looks like
 
-## Designing Service Functions
-
-Design as **capability blocks**, not monoliths:
+Small, composable, and honest about failure.
 
 ```ts
-// Good: composable, each caller chooses what to use
-createManagedSandbox(...)
-prepareRepo(...)
-detectPackageManager(...)
-installDependencies(...)
-runBuildCommand(...)
-startSandboxRuntime(...)
+// services/storage.ts
+
+type UploadResult =
+  | { ok: true; key: string; bytes: number; contentType: string }
+  | { ok: false; reason: "too-large" | "bad-type" | "upstream"; detail: string };
+
+export async function putObject(input: {
+  bucket: string;
+  key: string;
+  body: Uint8Array;
+  contentType: string;
+  maxBytes: number;
+}): Promise<UploadResult> {
+  if (input.body.byteLength > input.maxBytes) {
+    return { ok: false, reason: "too-large", detail: `${input.body.byteLength} bytes` };
+  }
+  // ... SDK call, retry, checksum
+}
 ```
 
-Each function should:
-- Accept all required data as **explicit parameters**
-- Return **structured outputs** (e.g., `{ ready, previewUrl, proxyPort }`)
-- Never reach into database/state directly
-- Make failure explicit (structured results, not swallowed errors)
+Four properties are doing the work:
 
-This lets callers choose strict vs relaxed behavior per flow.
+**Everything arrives as a parameter.** No reading config, session, or database
+inside. The caller supplies `maxBytes` because the limit is a product decision
+and different callers want different limits. A service that hardcodes it has
+stolen a decision from its callers.
 
-## Migration Checklist
+**The return is structured.** `ok: true` carries what the caller needs next.
+`ok: false` carries a reason the caller can branch on. A boolean tells the
+caller nothing; a thrown string forces string matching.
 
-When extracting shared logic:
+**Failure is in the type.** The caller cannot forget to handle it, because the
+compiler will not let them read `.key` without narrowing first.
 
-1. Write the flow in action code first (clear behavior)
-2. Mark repeated operational chunks across callers
-3. Extract **only** repeated, non-domain chunks to service
-4. Replace one caller → verify → replace remaining callers
-5. Keep domain policy in actions (auth, status transitions, error classification)
-6. Run verification: typecheck, lint, confirm all flows still work
+**It does one thing.** `putObject` does not also record an audit row or send a
+notification. Those are separate calls the boundary makes in whatever order its
+rules require.
 
-## Anti-Patterns
+Then the boundary stays readable, because it reads like the rules:
 
-| Anti-Pattern | Problem |
+```ts
+// app/api/avatar/route.ts
+export async function POST(req: Request) {
+  const user = await requireUser(req);                      // product: who
+  if (!user.canUploadAvatar) return forbidden();            // product: whether
+
+  const file = await readFile(req);
+  const result = await putObject({                          // mechanism
+    bucket: AVATAR_BUCKET,
+    key: `avatars/${user.id}`,
+    body: file.bytes,
+    contentType: file.type,
+    maxBytes: user.plan === "pro" ? 10_000_000 : 2_000_000, // product: limits
+  });
+
+  if (!result.ok) {
+    return result.reason === "too-large"
+      ? badRequest("Avatar must be under your plan limit")  // product: wording
+      : serverError();
+  }
+
+  await db.user.update({ where: { id: user.id }, data: { avatarKey: result.key } });
+  return ok({ url: publicUrl(result.key) });
+}
+```
+
+Every line in the handler is a decision someone could argue about in a product
+meeting. Nothing in it is about S3.
+
+## Extracting from existing code
+
+Do not refactor everything at once. The steps are ordered so that you can stop
+after any of them and still have working code.
+
+1. **Find the real duplication.** Two functions that look similar are not
+   necessarily doing the same thing. Read both and ask whether a change to one
+   should always change the other. If the answer is no, they are coincidental
+   twins and merging them creates a function with a flag argument, which is
+   worse than the duplication.
+
+2. **Extract for one caller only.** Pull the mechanism out, keep the signature
+   shaped by that single caller's needs, and leave the other callers untouched.
+   The code now exists in two places, which feels wrong and is temporary.
+
+3. **Verify that caller.** Tests, typecheck, and the flow exercised for real.
+   This is the checkpoint. If it is broken, exactly one caller is broken and
+   you know which change did it.
+
+4. **Migrate the next caller.** It will want something slightly different.
+   That difference becomes a parameter, not a branch inside the service. If you
+   find yourself adding `if (mode === "admin")`, stop: the difference is a
+   product rule and belongs in the boundary.
+
+5. **Delete the originals** once every caller is migrated. Skipping this leaves
+   dead code that the next person will read and believe.
+
+6. **Leave the domain logic where it was.** Auth checks, status transitions,
+   and user-facing error text should not have moved. If they did, put them
+   back.
+
+## When not to do this
+
+**One caller.** Extraction pays for itself at two. At one it buys indirection
+and nothing else. Write it inline and extract when the second caller shows up.
+
+**Throwaway code.** Structure is a bet that this code will be changed many
+times. A migration script run once does not collect on that bet.
+
+**The duplication is shrinking.** If two flows are converging and one will be
+deleted next month, wait for the deletion.
+
+## Ways this goes wrong
+
+**The god service.** One `handleUpload()` that authenticates, validates,
+stores, records, and notifies. It has one caller by construction, because
+nothing else wants that exact sequence. The signal is a function whose name
+contains "handle", "process", or "do".
+
+**The leaky service.** The service writes to the database directly, so calling
+it has consequences the caller cannot see. Now nobody can call it from a
+transaction, a test, or a dry run. Services return values; callers write state.
+
+**The flag parameter.** `sendEmail(to, body, { skipValidation, asAdmin, silent })`.
+Each flag is a product rule that leaked in. Three booleans is eight behaviours
+and your tests cover two of them.
+
+**Mismatched siblings.** One service function throws, the next returns null,
+the third returns `{ error }`. Callers cannot develop a habit, so every call
+site handles failure differently and some do not handle it at all. Pick one
+convention per module and hold it.
+
+**Anticipatory abstraction.** A service layer built before the second caller
+exists, shaped around imagined future needs. It will be wrong, and it will be
+load-bearing by the time you find out.
+
+## Quick test
+
+Read a function and ask what would make it change.
+
+| What would change it | Where it goes |
 |---|---|
-| **God service** | One huge function hides all control flow |
-| **Leaky service** | Service mutates database tables directly |
-| **Inconsistent API** | Each function uses different argument styles and error semantics |
-| **Over-abstraction** | Extracting logic used by only one caller |
+| A pricing decision | boundary |
+| A permission rule | boundary |
+| The wording of an error a user sees | boundary |
+| A vendor swap | service |
+| A timeout or retry policy | service |
+| A new required field in an API payload | service |
+| A change to which users get the feature | boundary |
+| A change to how the feature physically works | service |
 
-## Example: Email Service (Simple)
-
-```ts
-// emailService.ts — shared mechanics
-export async function sendWelcomeEmail(params: { to: string; name: string }) {
-  const html = `<h1>Welcome ${params.name}</h1>`;
-  await emailProvider.send(params.to, "Welcome", html);
-}
-
-// userSignup.ts — orchestration (owns WHEN to send)
-if (user.marketingOptIn) {
-  await sendWelcomeEmail({ to: user.email, name: user.name });
-}
-
-// adminInvite.ts — orchestration (different business rule, same mechanic)
-await sendWelcomeEmail({ to: invitee.email, name: invitee.name });
-```
-
-## Mental Model
-
-```
-New feature? → Write in action first → See repeated ops? → Extract to service
-                                      → No repetition?  → Keep in action
-```
-
-Your architecture in one sentence: **Actions orchestrate domain rules, while the service layer centralizes reusable operational mechanics with a composable, explicit-input API.**
+If a function would change for reasons on both sides of this table, it is two
+functions.

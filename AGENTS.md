@@ -94,8 +94,7 @@ Install with `npx skills add aditya-deokar/software-factory`.
 
 | Skill | Origin |
 |---|---|
-| `new-feature`, `code-structure`, `evidence-driven-testing` | adapted from [michaelshimeles/skills](https://github.com/michaelshimeles/skills) |
-| `skill-forge`, `release-train`, `windows-shell` | written for this package |
+| `new-feature`, `code-structure`, `evidence-driven-testing`, `skill-forge`, `release-train`, `windows-shell` | written for this package |
 | `before-and-after` | vendored from [vercel-labs/before-and-after](https://github.com/vercel-labs/before-and-after), PolyForm Shield 1.0.0 |
 | `greploop`, `greploop-apps` | vendored from [greptileai/skills](https://github.com/greptileai/skills), MIT |
 | `unslop` | vendored from [cursor/plugins (pstack)](https://github.com/cursor/plugins/tree/main/pstack/skills/unslop), MIT; frontmatter edited so agents apply it unprompted, body untouched |
