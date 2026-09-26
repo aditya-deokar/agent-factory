@@ -96,6 +96,17 @@ def analyze(store: Neo4jStore, project_id: str, ref: str, depth: int = 2) -> Imp
     up = store.read(UPSTREAM % depth, uid=uid, p=project_id)
     down = store.read(DOWNSTREAM, uid=uid)
     ctx = store.read(CONTEXT, uid=uid)[0]
+    member_uids = [uid] + [r["uid"] for r in store.read(
+        "MATCH (:Symbol {uid: $uid})-[:HAS_MEMBER]->(m:Symbol) RETURN m.uid AS uid", uid=uid)]
+    route_rows = store.read(
+        """
+        MATCH (r:Symbol:Route {project_id: $p})-[:HANDLES]->(h:Symbol)
+        MATCH (h)-[:CALLS|USES*0..4]->(x:Symbol) WHERE x.uid IN $targets
+        RETURN DISTINCT r.http_method + ' ' + r.http_path AS route
+        """,
+        p=project_id,
+        targets=member_uids,
+    )
     dependent_uids = [r["uid"] for r in up]
     tests = set(ctx["tests"])
     if dependent_uids:
@@ -112,7 +123,8 @@ def analyze(store: Neo4jStore, project_id: str, ref: str, depth: int = 2) -> Imp
         depth=depth,
         dependents=[entry(r) for r in up if r["kind"] != "route"],
         dependencies=[entry(r) for r in down],
-        routes=sorted({f"{r['http_method']} {r['http_path']}" for r in up if r["kind"] == "route"}),
+        routes=sorted({f"{r['http_method']} {r['http_path']}" for r in up if r["kind"] == "route"}
+                      | {r["route"] for r in route_rows if r["route"]}),
         tests=sorted(tests),
         co_changes=sorted((c for c in ctx["co_changes"] if c.get("path")), key=lambda c: -(c["count"] or 0)),
         knowledge=[k for k in ctx["knowledge"] if k.get("uid")],
