@@ -71,10 +71,40 @@ class FeatureState(BaseModel):
     updated_at: str | None = None
     plan: FeaturePlan | None = None
     steps: int = 0
+    # Phase 8: guardrails, evidence, completion
+    waivers: dict[str, str] = Field(default_factory=dict)  # finding id -> reason
+    guardrails: dict[str, Any] | None = None  # summary of the last check
+    test_baseline: int | None = None  # tests counted on the first passing regression run
+    outcome: str | None = None
+    pr_url: str | None = None
+    completed_at: str | None = None
+    memory_commit: dict[str, Any] | None = None
 
 
 class FeatureNotFound(LookupError):
     pass
+
+
+class IllegalFeatureTransition(ValueError):
+    pass
+
+
+_S = FeatureStatus
+FEATURE_TRANSITIONS: dict[str, set[str]] = {
+    _S.PLANNING.value: {_S.IN_PROGRESS.value, _S.VERIFYING.value, _S.DONE.value, _S.ABANDONED.value},
+    _S.IN_PROGRESS.value: {_S.VERIFYING.value, _S.DONE.value, _S.ABANDONED.value},
+    _S.VERIFYING.value: {_S.IN_PROGRESS.value, _S.DONE.value, _S.ABANDONED.value},
+    _S.DONE.value: set(),
+    _S.ABANDONED.value: set(),
+}
+
+
+def check_feature_transition(current: str, target: str) -> None:
+    """planning → in_progress → verifying ⇄ in_progress → done | abandoned (terminal)."""
+    if current == target:
+        return
+    if target not in FEATURE_TRANSITIONS.get(current, set()):
+        raise IllegalFeatureTransition(f"a feature cannot go from {current} to {target}")
 
 
 def _now() -> str:
@@ -107,6 +137,22 @@ class FeatureService:
             return dict(json.loads(path.read_text(encoding="utf-8"))) if path.exists() else {}
         except (OSError, json.JSONDecodeError):
             return {}
+
+    def save(self, state: FeatureState) -> None:
+        state.updated_at = _now()
+        self._save(state)
+
+    def set_status(self, state: FeatureState, status: str, save: bool = True, **props: Any) -> FeatureState:
+        check_feature_transition(state.status, status)
+        state.status = status
+        state.updated_at = _now()
+        self.repo.update(state.uid, status=status, **props)
+        if save:
+            self._save(state)
+        return state
+
+    def evidence_dir(self, state: FeatureState) -> Path:
+        return self.rt.root / ".agent-factory" / "evidence" / state.feature_id
 
     def get(self, fid: str) -> FeatureState:
         path = self._path(fid)
@@ -178,8 +224,7 @@ class FeatureService:
         if state is None:
             raise FeatureNotFound("no active feature on this branch; call start_feature first")
         state.plan = plan
-        state.status = FeatureStatus.IN_PROGRESS.value
-        state.updated_at = _now()
+        self.set_status(state, FeatureStatus.IN_PROGRESS.value, save=False)
         self.repo.update(
             state.uid,
             status=state.status,
@@ -230,6 +275,26 @@ class FeatureService:
         state.updated_at = _now()
         self._save(state)
         return state
+
+    def waive(self, fid: str | None, finding_id: str, reason: str) -> FeatureState:
+        state = self.active(fid)
+        if state is None:
+            raise FeatureNotFound("no active feature to add waiver to")
+        state.waivers[finding_id] = reason
+        self.save(state)
+        return state
+
+    async def complete(
+        self,
+        fid: str | None = None,
+        outcome: str = "success",
+        pr_url: str | None = None,
+        pre_merge: bool = True,
+    ) -> dict[str, Any]:
+        from .memory_commit import complete_feature
+
+        return await complete_feature(self.rt, fid, outcome=outcome, pr_url=pr_url, pre_merge=pre_merge)
+
 
 
 def render_plan(state: FeatureState) -> str:

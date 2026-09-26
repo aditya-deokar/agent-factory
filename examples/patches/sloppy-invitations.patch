@@ -1,0 +1,56 @@
+diff --git a/package.json b/package.json
+--- a/package.json
++++ b/package.json
+@@ -10,3 +10,4 @@
+     "express": "^4.19.2",
+-    "zod": "^3.23.8"
++    "zod": "^3.23.8",
++    "zustand": "^4.5.0"
+   }
+ }
+diff --git a/src/services/invitation-token.service.ts b/src/services/invitation-token.service.ts
+new file mode 100644
+--- /dev/null
++++ b/src/services/invitation-token.service.ts
+@@ -0,0 +1,24 @@
++import { randomBytes } from "crypto";
++
++export class InvitationTokenService {
++  async create(teamId: string, email: string): Promise<string> {
++    const token = randomBytes(24).toString("hex");
++    return token;
++  }
++
++  async validate(token: string): Promise<boolean> {
++    if (!token) return false;
++    return true;
++  }
++
++  async consume(token: string): Promise<void> {
++    // consume token
++  }
++
++  async expire(token: string): Promise<void> {
++    // expire token
++  }
++}
+diff --git a/src/controllers/team.controller.ts b/src/controllers/team.controller.ts
+--- a/src/controllers/team.controller.ts
++++ b/src/controllers/team.controller.ts
+@@ -3,2 +3,3 @@
+ import { TeamService } from "../services/team.service";
++import { TeamRepository } from "../repositories/team.repository";
+ 
+@@ -6,2 +7,3 @@
+   constructor(private readonly teams: TeamService) {}
++  private readonly repo = new TeamRepository();
+ 
+@@ -15,2 +17,8 @@
+   }
++
++  async invite(req: Request, res: Response): Promise<void> {
++    // Direct repository access in controller (violates ADR-002)
++    const team = await this.repo.findById(req.params.id);
++    res.json({ invited: true, team });
++  }
+ }

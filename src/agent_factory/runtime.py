@@ -112,6 +112,11 @@ class Runtime:
 
         return FeatureService(self)
 
+    def evidence(self, feature_id: str) -> Any:
+        from .evidence.store import EvidenceStore
+
+        return EvidenceStore(self.root, feature_id)
+
     def require_audit(self) -> dict[str, Any]:
         last = AuditRunRepo(self.store, self.project_id).last()
         if last is None:

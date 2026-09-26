@@ -90,3 +90,40 @@ def status(ctx: typer.Context, feature_id: Annotated[str | None, typer.Argument(
             c.print(f"{s.feature_id:<45} {s.status:<12} {s.branch or '-'}", markup=False)
 
     emit(ctx, sessions, render)
+
+
+@feature_app.command("complete")
+def complete(
+    ctx: typer.Context,
+    outcome: Annotated[str, typer.Option(help="Outcome: success | abandoned")] = "success",
+    pr_url: Annotated[str | None, typer.Option("--pr-url", help="PR URL")] = None,
+    feature_id: Annotated[str | None, typer.Option("--feature")] = None,
+) -> None:
+    """Finish the feature: commit what it changed into project memory and close its reasoning trace."""
+    from ..workflow.feature import FeatureNotFound
+
+    with runtime(ctx) as rt:
+        try:
+            result = asyncio.run(rt.features().complete(feature_id, outcome=outcome, pr_url=pr_url))
+        except FeatureNotFound as error:
+            fail(str(error))
+    emit(ctx, result, lambda c: c.print(f"Feature [bold]{result['feature_id']}[/] completed ({result['status']})."))
+
+
+@feature_app.command("waive")
+def waive(
+    ctx: typer.Context,
+    finding_id: Annotated[str, typer.Argument(help="ID of finding to waive")],
+    reason: Annotated[str, typer.Option("--reason", "-r", help="Documented reason for the waiver")],
+    feature_id: Annotated[str | None, typer.Option("--feature")] = None,
+) -> None:
+    """Waive a guardrail finding with an explicit architectural justification."""
+    from ..workflow.feature import FeatureNotFound
+
+    with runtime(ctx, need_audit=False) as rt:
+        try:
+            state = rt.features().waive(feature_id, finding_id, reason)
+        except FeatureNotFound as error:
+            fail(str(error))
+    emit(ctx, state, lambda c: c.print(f"Waiver registered for [bold]{finding_id}[/] on {state.feature_id}."))
+

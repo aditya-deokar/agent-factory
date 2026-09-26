@@ -14,11 +14,14 @@ import typer
 
 from .. import __version__
 from .audit_cmd import audit
+from .check_cmd import check
 from .common import AppState
 from .context_cmds import ask, context, impact, reuse
+from .evidence_cmds import evidence_app
 from .feature_cmds import feature_app
 from .mcp_cmd import mcp_app
 from .memory_cmds import memory_app
+from .pr_body_cmd import pr_body
 from .setup_cmds import doctor, init, status
 
 app = typer.Typer(
@@ -55,9 +58,13 @@ app.command()(context)
 app.command()(reuse)
 app.command()(impact)
 app.command()(ask)
+app.command()(check)
+app.command("pr-body")(pr_body)
 app.add_typer(memory_app, name="memory")
 app.add_typer(feature_app, name="feature")
+app.add_typer(evidence_app, name="evidence")
 app.add_typer(mcp_app, name="mcp")
+
 
 
 _GLOBAL_FLAGS = ("--json", "--verbose", "-v")

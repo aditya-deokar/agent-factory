@@ -1,0 +1,71 @@
+diff --git a/src/services/team-invitation.service.ts b/src/services/team-invitation.service.ts
+new file mode 100644
+--- /dev/null
++++ b/src/services/team-invitation.service.ts
+@@ -0,0 +1,23 @@
++import { TokenService } from "./token.service";
++import { EmailService } from "./email.service";
++import { TeamService } from "./team.service";
++
++export class TeamInvitationService {
++  constructor(
++    private readonly tokens: TokenService,
++    private readonly emails: EmailService,
++    private readonly teams: TeamService
++  ) {}
++
++  async invite(teamId: string, email: string): Promise<string> {
++    const token = await this.tokens.create("invitation", { teamId, email });
++    await this.emails.send(email, "Team Invitation", `Join team with token: ${token}`);
++    return token;
++  }
++
++  async accept(token: string, userId: string): Promise<void> {
++    const payload = await this.tokens.validate("invitation", token);
++    await this.teams.addMember(payload.teamId, userId);
++    await this.tokens.consume(token);
++  }
++}
+diff --git a/src/controllers/team.controller.ts b/src/controllers/team.controller.ts
+--- a/src/controllers/team.controller.ts
++++ b/src/controllers/team.controller.ts
+@@ -3,2 +3,3 @@
+ import { TeamService } from "../services/team.service";
++import { TeamInvitationService } from "../services/team-invitation.service";
+ 
+@@ -6,2 +7,5 @@
+   constructor(
+     private readonly teams: TeamService,
++    private readonly invitations: TeamInvitationService
++  ) {}
+ 
+@@ -15,2 +19,7 @@
+   }
++
++  async invite(req: Request, res: Response): Promise<void> {
++    const token = await this.invitations.invite(req.params.id, req.body.email);
++    res.json({ success: true, token });
++  }
+ }
+diff --git a/tests/team-invitation.service.test.ts b/tests/team-invitation.service.test.ts
+new file mode 100644
+--- /dev/null
++++ b/tests/team-invitation.service.test.ts
+@@ -0,0 +1,18 @@
++import { describe, it, expect, vi } from "vitest";
++import { TeamInvitationService } from "../src/services/team-invitation.service";
++
++describe("TeamInvitationService", () => {
++  it("invites member by creating token and sending email", async () => {
++    const tokens = { create: vi.fn().mockResolvedValue("tok123"), validate: vi.fn(), consume: vi.fn() };
++    const emails = { send: vi.fn().mockResolvedValue(true) };
++    const teams = { addMember: vi.fn() };
++
++    const service = new TeamInvitationService(tokens as any, emails as any, teams as any);
++    const res = await service.invite("team1", "alice@example.com");
++
++    expect(res).toBe("tok123");
++    expect(tokens.create).toHaveBeenCalledWith("invitation", { teamId: "team1", email: "alice@example.com" });
++    expect(emails.send).toHaveBeenCalled();
++  });
++});

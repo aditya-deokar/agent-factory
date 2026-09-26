@@ -406,30 +406,72 @@ def build_server(factory: Callable[[], Runtime]) -> MCPServer:
 
         return await traced("propose_memory", {"kind": kind, "title": title}, feature_id, work)
 
-    def _phase8(tool: str) -> dict[str, Any]:
-        return {
-            "status": "not_available_yet",
-            "summary": f"{tool} arrives with the guardrails and evidence engine (Phase 8). "
-            "Until then: run the project's tests yourself and attach their output to the PR.",
-            "data": None,
-        }
-
     @server.tool(annotations=READ)
     async def check_changes(feature_id: str | None = None, base: str | None = None) -> dict[str, Any]:
         """Run the anti-slop guardrails (duplication, architecture, scope, complexity...) on the current diff."""
-        return _phase8("check_changes")
+        from ..guardrails.diff import analyze_diff
+        from ..guardrails.rules import run_guardrails
+
+        async def work() -> dict[str, Any]:
+            runtime = rt()
+            state = runtime.features().active(feature_id)
+            base_sha = base or (state.base_sha if state else None)
+            diff = analyze_diff(runtime.root, base_sha=base_sha, project_id=runtime.project_id)
+            report = run_guardrails(
+                diff,
+                runtime,
+                plan=state.plan if state else None,
+                waivers=state.waivers if state else None,
+                test_baseline=state.test_baseline if state else None,
+                feature_id=state.feature_id if state else None,
+            )
+            return {"summary": report.to_markdown(), "data": report.model_dump(mode="json")}
+
+        return await traced("check_changes", {"feature_id": feature_id, "base": base}, feature_id, work)
 
     @server.tool(annotations=WRITE)
     async def add_evidence(kind: str, path: str, summary: str, feature_id: str | None = None) -> dict[str, Any]:
         """Register an evidence artifact (test output, screenshot, recording) for the active feature."""
-        return _phase8("add_evidence")
+        from ..workflow.feature import FeatureNotFound
+
+        async def work() -> dict[str, Any]:
+            runtime = rt()
+            state = runtime.features().active(feature_id)
+            if state is None:
+                raise ToolError("no active feature on this branch; call start_feature first")
+            src_path = Path(path)
+            if not src_path.is_absolute():
+                src_path = runtime.root / src_path
+            try:
+                item = runtime.evidence(state.feature_id).add_artifact(kind, src_path, summary)
+            except Exception as error:
+                raise ToolError(f"could not register evidence: {error}") from error
+            return {
+                "summary": f"Evidence registered: {item.id} ({item.path}) [SHA-256: {item.sha256[:10]}...]",
+                "data": item.model_dump(mode="json"),
+            }
+
+        return await traced("add_evidence", {"kind": kind, "path": path}, feature_id, work)
 
     @server.tool(annotations=WRITE)
     async def complete_feature(
         outcome: str = "success", pr_url: str | None = None, feature_id: str | None = None
     ) -> dict[str, Any]:
         """Finish the feature: commit what it changed into project memory and close its reasoning trace."""
-        return _phase8("complete_feature")
+        from ..workflow.feature import FeatureNotFound
+
+        async def work() -> dict[str, Any]:
+            runtime = audited()
+            try:
+                result = await runtime.features().complete(feature_id, outcome=outcome, pr_url=pr_url)
+            except FeatureNotFound as error:
+                raise ToolError(str(error)) from error
+            except Exception as error:
+                raise ToolError(f"could not complete feature: {error}") from error
+            return {"summary": result["summary"], "data": result}
+
+        return await traced("complete_feature", {"outcome": outcome, "pr_url": pr_url}, feature_id, work)
+
 
     # -- resources & prompts --------------------------------------------------------------------------------------
 

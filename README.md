@@ -46,7 +46,10 @@ agent-factory memory review          # approve / reject what the auditor found
 | `reuse <Name> --desc ... --methods a,b` | Does it already exist? Verdict reuse / extend / new_ok with evidence (spec §16) |
 | `impact <Symbol\|path> [--depth N]` | Dependents, routes that reach it, tests to run, co-changed files, rules in force |
 | `ask "<question>" [--show-cypher]` | Structured questions about the code graph (Text2Cypher, read-only by force) |
-| `feature start / plan / step / status` | Feature sessions: short-term task memory mapped to the branch |
+| `check [--feature id] [--only ...] [--waive id --reason ...]` | Run the 8 anti-slop guardrails (duplication, architecture, scope, complexity...) |
+| `evidence collect / add / list / verify` | Cryptographic evidence store: collect test/diff artifacts and verify SHA-256 integrity |
+| `pr-body [--feature id] [--out pr.md]` | Render an evidence-backed PR description strictly from structured data |
+| `feature start / plan / step / complete / status` | Feature sessions: short-term task memory and post-feature memory commit |
 | `mcp serve [--http]` | The MCP server for Claude Code, Cursor, VS Code, Codex, Antigravity |
 
 Every command accepts `--json` (anywhere on the line) for agents.
@@ -54,9 +57,9 @@ Every command accepts `--json` (anywhere on the line) for agents.
 ### MCP tools (`agent-factory mcp serve`)
 
 Read: `get_feature_context`, `find_reusable`, `impact_of`, `get_constraints`, `get_patterns`, `search_memory`,
-`ask_graph`, `how_did_we_handle`, `get_feature`. Write (candidates and sessions only): `start_feature`,
-`record_plan`, `record_step`, `propose_memory`. Phase 8: `check_changes`, `add_evidence`, `complete_feature`
-(they answer `not_available_yet` for now). Retrieval quality: [docs/eval/retrieval-ablation.md](docs/eval/retrieval-ablation.md).
+`ask_graph`, `how_did_we_handle`, `get_feature`, `check_changes`.
+Write: `start_feature`, `record_plan`, `record_step`, `propose_memory`, `add_evidence`, `complete_feature`.
+Retrieval quality: [docs/eval/retrieval-ablation.md](docs/eval/retrieval-ablation.md) · With/Without experiment: [docs/eval/with-without.md](docs/eval/with-without.md).
 
 ### Skills (Agent Factory)
 
@@ -75,10 +78,11 @@ uv run ruff check src tests && uv run mypy src
 npm test                                       # skill lint, package check, recorder tests
 ```
 
-Implementation status (plan in `../plan/implementation/`): Phase 0 (spikes, see [docs/spikes](docs/spikes/README.md)),
+Implementation status (plan in `../plan/implementation/`): Complete across all phases: Phase 0 (spikes),
 1 (CLI, config, dual Neo4j), 2 (graph schema), 3 (Project Auditor), 4 (evidence-backed memory),
-5 (context engine, reuse, impact), 6 (MCP server) and 7 (skills) are done.
-Phases 8–9 (guardrails and evidence engine, demo) come next.
+5 (context engine, reuse, impact), 6 (MCP server), 7 (skills), 8 (guardrails & evidence engine),
+and 9 (end-to-end validation, demo, release).
+
 
 ## Neo4j Usage: How Neo4j Powers Agent Factory
 

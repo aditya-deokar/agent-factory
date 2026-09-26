@@ -98,6 +98,28 @@ def status(ctx: typer.Context) -> None:
         result["same_instance"] = stores.same_instance
         result["last_audit"] = AuditRunRepo(stores.domain, config.project.id).last()
         result["memory"] = KnowledgeRepo(stores.domain, config.project.id).counts()
+        try:
+            from ..evidence.store import EvidenceStore
+            from ..runtime import Runtime
+
+            rt = Runtime(st.root, config, stores, env=st.env)
+            feat = rt.features().active()
+            if feat:
+                ev_store = EvidenceStore(st.root, feat.feature_id)
+                items = ev_store.list_items()
+                verified, _ = ev_store.verify()
+                result["feature"] = {
+                    "id": feat.feature_id,
+                    "name": feat.name,
+                    "status": feat.status,
+                    "branch": feat.branch,
+                    "has_plan": bool(feat.plan),
+                    "guardrails": feat.guardrails,
+                    "evidence_count": len(items),
+                    "evidence_verified": verified,
+                }
+        except Exception:
+            pass
 
     def render(c: Console) -> None:
         head = str(result["head"])[:7]
@@ -120,5 +142,14 @@ def status(ctx: typer.Context) -> None:
             c.print("[bold]Memory[/]  " + " · ".join(parts) + f" · candidates {candidates}")
         else:
             c.print("[bold]Memory[/]  empty")
+        feat = result.get("feature")
+        if feat:
+            c.print(f"[bold]Feature[/] {feat['id']} · {feat['status']} · branch {feat['branch'] or '-'}")
+            plan_str = "plan ✓" if feat["has_plan"] else "plan ✗"
+            gr = feat.get("guardrails")
+            gr_str = f"guardrails {gr.get('status', 'not run')}" if gr else "guardrails not run"
+            ev_str = f"evidence {feat['evidence_count']} items ({'verified' if feat['evidence_verified'] else 'unverified'})"
+            c.print(f"         {plan_str} · {gr_str} · {ev_str}")
 
     emit(ctx, result, render)
+
