@@ -8,3 +8,18 @@ node_modules/
 .env
 .env.local
 CHANGELOG-latest.md
+.env.*
+!.env.example
+
+# Python / uv
+.venv/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+
+# Agent Factory local state (config agent-factory.yaml is committed)
+.agent-factory/cache/
+.agent-factory/evidence/
+.agent-factory/audit.log

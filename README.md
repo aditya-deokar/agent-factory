@@ -1,3 +1,58 @@
+# Agent Factory
+
+A local-first engineering harness that gives the coding agent you already use (Claude Code, Cursor,
+Codex, Antigravity) persistent, evidence-backed codebase memory in Neo4j. It adds reusable skills,
+architectural context and guardrails on top of the Software Factory skills described below.
+
+The agent still plans and writes the code. Agent Factory remembers the architecture, the patterns, the
+decisions and the constraints, and backs each one with evidence.
+
+## Quickstart
+
+```bash
+docker compose up -d                 # local Neo4j 5.26 (or point .env at Aura)
+cp .env.example .env                 # fill in NEO4J_* (and OPENAI_* for embeddings)
+uv tool install .                    # or: uv run agent-factory ...
+cd /path/to/your/repo
+agent-factory init                   # config, .agent-factory/, MCP configs, AGENTS.md section
+agent-factory doctor                 # config, env, Neo4j, schema, MCP, skills
+agent-factory audit                  # repository -> knowledge graph + evidence-backed candidates
+agent-factory memory review          # approve / reject what the auditor found
+```
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `init [--agents ...] [--dry-run] [--skills]` | Sets up the harness. Idempotent, and never deletes anything |
+| `doctor [--online]` | Checks everything the harness needs; exit code 0 ok, 1 failed, 2 misconfigured, 3 infra down |
+| `status` | Project, schema version, last audit, memory counts |
+| `audit [--full] [--dry-run] [--no-embed] [--no-history]` | Observe → map → extract → validate → store. Incremental by default |
+| `memory list / show / search / log` | Inspect knowledge, its evidence (`path:line`) and its audit trail |
+| `memory approve / reject / deprecate / supersede` | Move knowledge through the lifecycle (candidate → validated → deprecated/superseded) |
+| `memory propose --kind --title --claim --evidence path:l1-l2` | Add knowledge; it is validated like everything else |
+| `memory export / import / delete / purge` | Back up, restore or remove memory (§30) |
+| `memory migrate / schema --md` | Create the graph schema; document it ([docs/graph-schema.md](docs/graph-schema.md)) |
+
+Every command accepts `--json` (anywhere on the line) for agents.
+
+## Development
+
+```bash
+uv run pytest                                  # unit tests (fast)
+uv run pytest -m "neo4j or contract"           # integration: starts Neo4j via testcontainers
+uv run pytest -m "not live and not agent"      # what CI runs
+uv run pytest -m live                          # read-only checks against Aura + the LLM proxy (.env.live)
+uv run ruff check src tests && uv run mypy src
+npm test                                       # skill lint, package check, recorder tests
+```
+
+Implementation status (plan in `../plan/implementation/`): Phase 0 (spikes, see [docs/spikes](docs/spikes/README.md)),
+1 (CLI, config, dual Neo4j), 2 (graph schema), 3 (Project Auditor) and 4 (evidence-backed memory) are done.
+Phases 5–9 (context engine, MCP server, skills, guardrails, demo) come next.
+
+---
+
 # Software Factory
 
 Agent skills for shipping software with proof. Ten skills that take a task from

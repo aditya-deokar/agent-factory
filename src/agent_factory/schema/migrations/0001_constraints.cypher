@@ -1,0 +1,14 @@
+// Uniqueness constraints: every domain node is addressed by a deterministic uid.
+CREATE CONSTRAINT af_project_id IF NOT EXISTS FOR (n:Project) REQUIRE n.id IS UNIQUE;
+CREATE CONSTRAINT af_module_uid IF NOT EXISTS FOR (n:Module) REQUIRE n.uid IS UNIQUE;
+CREATE CONSTRAINT af_file_uid IF NOT EXISTS FOR (n:File) REQUIRE n.uid IS UNIQUE;
+CREATE CONSTRAINT af_symbol_uid IF NOT EXISTS FOR (n:Symbol) REQUIRE n.uid IS UNIQUE;
+CREATE CONSTRAINT af_knowledge_uid IF NOT EXISTS FOR (n:Knowledge) REQUIRE n.uid IS UNIQUE;
+CREATE CONSTRAINT af_feature_uid IF NOT EXISTS FOR (n:Feature) REQUIRE n.uid IS UNIQUE;
+CREATE CONSTRAINT af_evidence_uid IF NOT EXISTS FOR (n:Evidence) REQUIRE n.uid IS UNIQUE;
+CREATE CONSTRAINT af_commit_uid IF NOT EXISTS FOR (n:Commit) REQUIRE n.uid IS UNIQUE;
+CREATE CONSTRAINT af_doc_uid IF NOT EXISTS FOR (n:Doc) REQUIRE n.uid IS UNIQUE;
+CREATE CONSTRAINT af_chunk_uid IF NOT EXISTS FOR (n:DocChunk) REQUIRE n.uid IS UNIQUE;
+CREATE CONSTRAINT af_run_uid IF NOT EXISTS FOR (n:AuditRun) REQUIRE n.uid IS UNIQUE;
+CREATE CONSTRAINT af_event_uid IF NOT EXISTS FOR (n:MemoryEvent) REQUIRE n.uid IS UNIQUE;
+CREATE CONSTRAINT af_schema_version_id IF NOT EXISTS FOR (n:SchemaVersion) REQUIRE n.id IS UNIQUE;

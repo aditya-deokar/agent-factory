@@ -1,0 +1,20 @@
+# Domain synonyms for query expansion (spec §15). A request term expands to every term in its group.
+# Projects can add groups in .agent-factory/synonyms.yaml. Real embeddings make most of these
+# unnecessary; they keep offline retrieval (no embeddings) useful.
+groups:
+  - [invitation, invite, token, email]
+  - [token, code, otp, nonce]
+  - [email, mail, notification, smtp, template]
+  - [team, org, organization, workspace, group, member]
+  - [user, account, member, profile]
+  - [password, reset, credential]
+  - [verification, verify, confirm]
+  - [login, signin, auth, authentication, session, register, signup]
+  - [permission, role, authorization, access]
+  - [payment, billing, invoice, charge, subscription]
+  - [queue, job, worker, background]
+  - [cache, redis]
+  - [validation, validate, schema, zod]
+  - [error, exception, failure]
+  - [database, db, table, model, repository, persistence, storage]
+  - [expire, expiry, expiration, ttl]

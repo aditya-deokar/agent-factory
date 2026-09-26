@@ -1,7 +1,7 @@
 {
-  "name": "@software-factory/skills",
+  "name": "@agent-factory/skills",
   "version": "2.0.0",
-  "description": "Agent skills for shipping software with proof: isolate, build, prove, ship. Works with Claude Code, Cursor, Codex, Copilot, and 75 more agents.",
+  "description": "Agent Factory: a local-first engineering harness that gives coding agents persistent codebase memory (Neo4j), reusable skills, architectural context, and evidence-driven workflows. Builds on Software Factory: isolate, build, prove, ship.",
   "keywords": [
     "agent-skills",
     "skills",
@@ -12,15 +12,19 @@
     "ai-agents",
     "code-review",
     "worktree",
-    "test-evidence"
+    "test-evidence",
+    "neo4j",
+    "knowledge-graph",
+    "agent-memory",
+    "mcp"
   ],
-  "homepage": "https://github.com/aditya-deokar/software-factory#readme",
+  "homepage": "https://github.com/aditya-deokar/agent-factory#readme",
   "bugs": {
-    "url": "https://github.com/aditya-deokar/software-factory/issues"
+    "url": "https://github.com/aditya-deokar/agent-factory/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aditya-deokar/software-factory.git"
+    "url": "git+https://github.com/aditya-deokar/agent-factory.git"
   },
   "license": "MIT",
   "author": "Aditya Deokar",
@@ -30,12 +34,14 @@
     "AGENTS.md",
     "NOTICE.md",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "!**/__pycache__/**",
+    "!**/*.pyc"
   ],
   "scripts": {
     "lint": "node scripts/lint-skills.mjs",
     "list": "npx skills add . --list",
-    "test": "node scripts/lint-skills.mjs && node scripts/check-package.mjs && python -m pytest tests/ -q",
+    "test": "node scripts/lint-skills.mjs && node scripts/check-package.mjs && python -m pytest tests/test_record.py -q",
     "prepublishOnly": "node scripts/lint-skills.mjs && node scripts/check-package.mjs"
   },
   "publishConfig": {

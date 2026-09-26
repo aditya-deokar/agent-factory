@@ -60,4 +60,49 @@ jobs:
           python-version: "3.11"
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: pip install pytest
-      - run: python -m pytest tests/ -q
+      - run: python -m pytest tests/test_record.py -q
+
+  python-lint:
+    name: Python lint & types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run ruff check src tests
+      - run: uv run ruff format --check src tests
+      - run: uv run mypy src
+
+  python-unit:
+    name: Python unit (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run pytest tests/unit -q --cov=agent_factory --cov-report=term-missing:skip-covered
+
+  python-integration:
+    name: Python integration (Neo4j 5.26)
+    runs-on: ubuntu-latest
+    services:
+      neo4j:
+        image: neo4j:5.26-community
+        env:
+          NEO4J_AUTH: neo4j/agentfactory
+        ports: ["7687:7687"]
+        options: >-
+          --health-cmd "wget -qO- http://localhost:7474 || exit 1"
+          --health-interval 5s --health-timeout 5s --health-retries 30
+    env:
+      AF_TEST_NEO4J_URI: bolt://localhost:7687
+      AF_TEST_NEO4J_PASSWORD: agentfactory
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run pytest -m "neo4j or contract" -q

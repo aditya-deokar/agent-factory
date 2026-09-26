@@ -1,0 +1,22 @@
+# Local Neo4j for development and integration tests.
+# Both the domain graph and agent memory point here in same-instance mode.
+services:
+  neo4j:
+    image: neo4j:5.26-community
+    container_name: agent-factory-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/agentfactory
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - af-neo4j-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  af-neo4j-data: {}
