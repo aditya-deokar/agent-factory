@@ -40,6 +40,10 @@ def test_init_creates_expected_tree(repo: Path):
     assert vscode["servers"]["agent-factory"] == {"type": "stdio", "command": "agent-factory", "args": ["mcp", "serve"]}
     claude = json.loads((repo / ".mcp.json").read_text())
     assert claude["mcpServers"]["agent-factory"]["args"] == ["mcp", "serve"]
+    assert "@AGENTS.md" in (repo / "CLAUDE.md").read_text()
+    assert "alwaysApply: true" in (repo / ".cursor/rules/agent-factory.mdc").read_text()
+    agents = (repo / "AGENTS.md").read_text()
+    assert "find_reusable" in agents and "implementation-workflow" in agents
 
 
 def test_init_is_idempotent(repo: Path):

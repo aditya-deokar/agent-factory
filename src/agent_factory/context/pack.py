@@ -166,7 +166,8 @@ def render_item(section: str, item: Any) -> str:
         return f"- **{item.name}** is used by {', '.join(item.dependents[:8]) or 'nothing else'}{tests}"
     if section == "related_features":
         return f"- **{item.name}** ({item.status}) — {item.request or ''}" + (
-            f"; touched {', '.join(item.touched[:6])}" if item.touched else "")
+            f"; touched {', '.join(item.touched[:6])}" if item.touched else ""
+        )
     if section == "tests":
         return f"- `{item.path}` covers {', '.join(item.covers[:6])}"
     if section == "docs":
@@ -217,7 +218,8 @@ def apply_budget(pack: ContextPack, limit: int) -> ContextPack:
                 kept.append(item)
                 used += cost
             else:
-                report.cut.append(f"{section}: {getattr(item, 'name', None) or getattr(item, 'title', None) or getattr(item, 'path', '')}")
+                label = getattr(item, "name", None) or getattr(item, "title", None) or getattr(item, "path", "")
+                report.cut.append(f"{section}: {label}")
         setattr(pack, section, kept)
         report.per_section[section] = used
         total_used += used
@@ -233,7 +235,8 @@ def _memory_md(m: MemoryItem) -> str:
         lines += ["Team preferences:"] + [f"- {p}" for p in m.preferences[:6]]
     if m.similar_tasks:
         lines += ["Similar past tasks:"] + [
-            f"- {t.task} → {t.outcome or 'no outcome recorded'}" + (" ✓" if t.success else " ✗" if t.success is False else "")
+            f"- {t.task} → {t.outcome or 'no outcome recorded'}"
+            + (" ✓" if t.success else " ✗" if t.success is False else "")
             for t in m.similar_tasks[:3]
         ]
     if m.notes:
@@ -267,8 +270,11 @@ def render_markdown(pack: ContextPack) -> str:
     section("Unverified observations (candidates — not rules)", "unverified")
     out += _plan_skeleton(pack)
     if pack.budget.cut:
-        out += ["", f"_Trimmed to fit {pack.budget.limit} tokens: {', '.join(pack.budget.cut[:12])}. "
-                "Ask for more with a larger budget._"]
+        out += [
+            "",
+            f"_Trimmed to fit {pack.budget.limit} tokens: {', '.join(pack.budget.cut[:12])}. "
+            "Ask for more with a larger budget._",
+        ]
     for w in pack.warnings:
         out.append(f"_Note: {w}_")
     return "\n".join(out).rstrip() + "\n"

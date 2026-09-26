@@ -44,17 +44,46 @@ AGENTS_SECTION = """\
 ## Agent Factory
 
 This repository uses [Agent Factory](https://github.com/aditya-deokar/agent-factory): persistent,
-evidence-backed engineering memory in Neo4j, exposed through the `agent-factory` MCP server and CLI.
+evidence-backed engineering memory in Neo4j, exposed through the `agent-factory` MCP server and CLI
+(every CLI command accepts `--json`). You write the code; Agent Factory tells you what already exists,
+which rules apply, and remembers what you learn.
 
-Before changing code:
+### Workflow for every feature or non-trivial fix (skill: implementation-workflow)
 
-1. Retrieve project memory for the request (`get_feature_context`, or `agent-factory context "<request>" --json`).
-2. Check for reusable implementations before creating any new class, service, hook, component or module
-   (`find_reusable`, or `agent-factory reuse <Name> --json`).
-3. Respect validated constraints and decisions (`get_constraints`, or `agent-factory memory list --status validated`).
+1. **Retrieve memory** (memory-retrieval): `get_feature_context` / `agent-factory context "<request>"`.
+2. **Isolate** (worktree-isolation): a fresh branch, never main.
+3. **Plan** (feature-planning): `start_feature`, then `record_plan` / `agent-factory feature start|plan`.
+4. **Check reuse** (reuse-check): `find_reusable` / `agent-factory reuse <Name>` for every new abstraction.
+5. **Build** (service-layer), following the validated patterns cited in the plan.
+6. **Record knowledge** (memory-update): `propose_memory` with `path:line` evidence.
+7. **Check architecture** (architecture-check): constraints, duplication, dependencies, scope.
+8. **Prove** (verification, test-evidence, visual-diff): run the checks, keep the evidence.
+9. **Ship** (pr-evidence, code-review-loop): an evidence-backed PR body.
+10. **Commit memory** (memory-commit): leave the repository smarter for the next feature.
 
-While and after changing code: record durable findings as memory candidates with evidence, run the
-guardrails, and leave the repository's memory richer for the next feature.
+### Guardrail questions before calling anything done
+
+Duplication (does it already exist?) · Abstraction (is it necessary?) · Architecture (existing
+boundaries?) · Reusability · Consistency (validated patterns?) · Complexity (new infrastructure?) ·
+Scope (unrelated files?) · Regression (existing tests pass?).
+
+Validated constraints are not yours to break: stop and ask. Candidates are hints, not rules.
+"""
+
+CLAUDE_SECTION = """\
+@AGENTS.md
+"""
+
+CURSOR_RULE = """\
+---
+description: Agent Factory workflow - retrieve memory, check reuse, respect constraints, prove, commit memory
+alwaysApply: true
+---
+
+Follow the "Agent Factory" section of AGENTS.md for every feature or non-trivial fix:
+call get_feature_context before editing, find_reusable before creating any new class or module,
+impact_of before changing a shared symbol, and propose_memory for durable findings with evidence.
+Validated constraints are rules; candidates are hints.
 """
 
 CODEX_SNIPPET = """\
@@ -161,6 +190,11 @@ def run_init(root: Path, opts: InitOptions) -> InitResult:
         notes.append("Codex reads a user-global config. Add this yourself:\n" + CODEX_SNIPPET)
 
     actions.append(merge_marked_section(root / "AGENTS.md", "AGENTS.md", AGENTS_SECTION, dry, title="# Agents"))
+    actions.append(merge_marked_section(root / "CLAUDE.md", "CLAUDE.md", CLAUDE_SECTION, dry))
+    if "cursor" in opts.agents:
+        actions.append(
+            write_text(root / ".cursor/rules/agent-factory.mdc", CURSOR_RULE, ".cursor/rules/agent-factory.mdc", dry)
+        )
 
     if opts.install_skills:
         actions.append(_install_skills(root, dry))

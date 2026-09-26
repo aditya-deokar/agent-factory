@@ -184,6 +184,7 @@ def test_unchanged_reaudit_is_incremental_and_changes_nothing(stores, audited):
     after = AdminRepo(stores.domain, pid).stats()
     assert report.mode == "incremental" and report.files["written"] == 0
     before["labels"]["AuditRun"] += 1
+    before["relationships"]["CONTAINS"] += 1  # (Project)-[:CONTAINS]->(the new AuditRun)
     assert after == before
     assert {
         x["uid"]: (x["status"], x["confidence"]) for x in KnowledgeRepo(stores.domain, pid).list_knowledge()

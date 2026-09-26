@@ -1,0 +1,556 @@
+# serializer version: 1
+# name: test_tool_catalogue_snapshot
+  dict({
+    'add_evidence': dict({
+      'input': dict({
+        'properties': dict({
+          'feature_id': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Feature Id',
+          }),
+          'kind': dict({
+            'title': 'Kind',
+            'type': 'string',
+          }),
+          'path': dict({
+            'title': 'Path',
+            'type': 'string',
+          }),
+          'summary': dict({
+            'title': 'Summary',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'kind',
+          'path',
+          'summary',
+        ]),
+        'title': 'add_evidenceArguments',
+        'type': 'object',
+      }),
+      'read_only': False,
+    }),
+    'ask_graph': dict({
+      'input': dict({
+        'properties': dict({
+          'question': dict({
+            'title': 'Question',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'question',
+        ]),
+        'title': 'ask_graphArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'check_changes': dict({
+      'input': dict({
+        'properties': dict({
+          'base': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Base',
+          }),
+          'feature_id': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Feature Id',
+          }),
+        }),
+        'title': 'check_changesArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'complete_feature': dict({
+      'input': dict({
+        'properties': dict({
+          'feature_id': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Feature Id',
+          }),
+          'outcome': dict({
+            'default': 'success',
+            'title': 'Outcome',
+            'type': 'string',
+          }),
+          'pr_url': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Pr Url',
+          }),
+        }),
+        'title': 'complete_featureArguments',
+        'type': 'object',
+      }),
+      'read_only': False,
+    }),
+    'find_reusable': dict({
+      'input': dict({
+        'properties': dict({
+          'description': dict({
+            'default': '',
+            'title': 'Description',
+            'type': 'string',
+          }),
+          'feature_id': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Feature Id',
+          }),
+          'methods': dict({
+            'anyOf': list([
+              dict({
+                'items': dict({
+                  'type': 'string',
+                }),
+                'type': 'array',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Methods',
+          }),
+          'name': dict({
+            'title': 'Name',
+            'type': 'string',
+          }),
+          'role': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Role',
+          }),
+        }),
+        'required': list([
+          'name',
+        ]),
+        'title': 'find_reusableArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'get_constraints': dict({
+      'input': dict({
+        'properties': dict({
+          'scope': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Scope',
+          }),
+        }),
+        'title': 'get_constraintsArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'get_feature': dict({
+      'input': dict({
+        'properties': dict({
+          'feature_id': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Feature Id',
+          }),
+        }),
+        'title': 'get_featureArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'get_feature_context': dict({
+      'input': dict({
+        'properties': dict({
+          'budget_tokens': dict({
+            'default': 4000,
+            'title': 'Budget Tokens',
+            'type': 'integer',
+          }),
+          'feature_id': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Feature Id',
+          }),
+          'request': dict({
+            'title': 'Request',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'request',
+        ]),
+        'title': 'get_feature_contextArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'get_patterns': dict({
+      'input': dict({
+        'properties': dict({
+          'category': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Category',
+          }),
+          'include_candidates': dict({
+            'default': False,
+            'title': 'Include Candidates',
+            'type': 'boolean',
+          }),
+        }),
+        'title': 'get_patternsArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'how_did_we_handle': dict({
+      'input': dict({
+        'properties': dict({
+          'task': dict({
+            'title': 'Task',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'task',
+        ]),
+        'title': 'how_did_we_handleArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'impact_of': dict({
+      'input': dict({
+        'properties': dict({
+          'depth': dict({
+            'default': 2,
+            'title': 'Depth',
+            'type': 'integer',
+          }),
+          'feature_id': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Feature Id',
+          }),
+          'symbol_or_path': dict({
+            'title': 'Symbol Or Path',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'symbol_or_path',
+        ]),
+        'title': 'impact_ofArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'propose_memory': dict({
+      'input': dict({
+        'properties': dict({
+          'claim': dict({
+            'title': 'Claim',
+            'type': 'string',
+          }),
+          'evidence': dict({
+            'items': dict({
+              'type': 'string',
+            }),
+            'title': 'Evidence',
+            'type': 'array',
+          }),
+          'feature_id': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Feature Id',
+          }),
+          'kind': dict({
+            'title': 'Kind',
+            'type': 'string',
+          }),
+          'rationale': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Rationale',
+          }),
+          'rule': dict({
+            'anyOf': list([
+              dict({
+                'additionalProperties': True,
+                'type': 'object',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Rule',
+          }),
+          'title': dict({
+            'title': 'Title',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'kind',
+          'title',
+          'claim',
+          'evidence',
+        ]),
+        'title': 'propose_memoryArguments',
+        'type': 'object',
+      }),
+      'read_only': False,
+    }),
+    'record_plan': dict({
+      'input': dict({
+        'properties': dict({
+          'feature_id': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Feature Id',
+          }),
+          'plan': dict({
+            'additionalProperties': True,
+            'title': 'Plan',
+            'type': 'object',
+          }),
+        }),
+        'required': list([
+          'plan',
+        ]),
+        'title': 'record_planArguments',
+        'type': 'object',
+      }),
+      'read_only': False,
+    }),
+    'record_step': dict({
+      'input': dict({
+        'properties': dict({
+          'action': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Action',
+          }),
+          'feature_id': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Feature Id',
+          }),
+          'result_summary': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Result Summary',
+          }),
+          'thought': dict({
+            'title': 'Thought',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'thought',
+        ]),
+        'title': 'record_stepArguments',
+        'type': 'object',
+      }),
+      'read_only': False,
+    }),
+    'search_memory': dict({
+      'input': dict({
+        'properties': dict({
+          'include_candidates': dict({
+            'default': False,
+            'title': 'Include Candidates',
+            'type': 'boolean',
+          }),
+          'limit': dict({
+            'default': 10,
+            'title': 'Limit',
+            'type': 'integer',
+          }),
+          'query': dict({
+            'title': 'Query',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'query',
+        ]),
+        'title': 'search_memoryArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'start_feature': dict({
+      'input': dict({
+        'properties': dict({
+          'branch': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Branch',
+          }),
+          'budget_tokens': dict({
+            'default': 4000,
+            'title': 'Budget Tokens',
+            'type': 'integer',
+          }),
+          'name': dict({
+            'title': 'Name',
+            'type': 'string',
+          }),
+          'request': dict({
+            'title': 'Request',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'name',
+          'request',
+        ]),
+        'title': 'start_featureArguments',
+        'type': 'object',
+      }),
+      'read_only': False,
+    }),
+  })
+# ---

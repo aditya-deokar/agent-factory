@@ -1,0 +1,23 @@
+# Reuse-detection eval for the teamapp-ts fixture.
+# `expect`: acceptable existing symbols for a duplicate proposal; empty = genuinely new (should be new_ok).
+cases:
+  - {name: InvitationTokenService, desc: "Create, validate and expire invitation tokens", methods: [create, validate, expire], expect: [TokenService]}
+  - {name: MailerService, desc: "Send transactional emails from templates", methods: [sendMail], expect: [EmailService, EmailClient]}
+  - {name: TeamsRepo, desc: "Persist teams and look them up by id", methods: [insert, findById], expect: [TeamRepository]}
+  - {name: VerificationCodeService, desc: "Generate and verify one-time verification codes", methods: [generate, verify], expect: [TokenService, EmailVerificationService]}
+  - {name: UserAccountService, desc: "Register user accounts and read profiles", methods: [register, getProfile], expect: [UserService]}
+  - {name: SmtpClient, desc: "Send mail through the SMTP provider", methods: [send], expect: [EmailClient, EmailService]}
+  - {name: PasswordRecoveryService, desc: "Request a password reset and reset the password", methods: [requestReset, resetPassword], expect: [PasswordResetService]}
+  - {name: MembershipService, desc: "Add team members and list them", methods: [addMember, listMembers], expect: [TeamService, TeamRepository]}
+  - {name: TokenStore, desc: "Insert tokens, find them by value, delete expired ones", methods: [insert, findByValue, deleteExpired], expect: [TokenRepository, TokenService]}
+  - {name: EmailConfirmationService, desc: "Send an email verification link and confirm it", methods: [sendVerification, confirm], expect: [EmailVerificationService]}
+  - {name: CsvExportService, desc: "Export team members to a CSV file", methods: [exportCsv], expect: []}
+  - {name: PaymentService, desc: "Charge a card and refund payments", methods: [charge, refund], expect: []}
+  - {name: ImageResizer, desc: "Resize uploaded avatar images", methods: [resize], expect: []}
+  - {name: FeatureFlagService, desc: "Check whether a feature flag is enabled", methods: [isEnabled], expect: []}
+  - {name: RateLimiter, desc: "Count requests per client and block bursts", methods: [hit, reset], expect: []}
+  - {name: SearchIndexer, desc: "Index documents for full-text search", methods: [index, query], expect: []}
+  - {name: AnalyticsTracker, desc: "Track product analytics events", methods: [track], expect: []}
+  - {name: PdfRenderer, desc: "Render invoices as PDF documents", methods: [render], expect: []}
+  - {name: CacheService, desc: "Cache values in memory with a TTL", methods: [get, set], expect: []}
+  - {name: WebhookDispatcher, desc: "Dispatch webhooks to partner endpoints", methods: [dispatch], expect: []}

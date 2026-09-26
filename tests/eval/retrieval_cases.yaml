@@ -1,0 +1,29 @@
+# Retrieval eval for the teamapp-ts fixture (tests/fixtures/build_teamapp.py).
+# Written by hand from the fixture's code before tuning. `expect`: symbols an engineer would want in context.
+# `split`: tune (weights may be tuned on these) or holdout (reported separately, never tuned on).
+cases:
+  - {request: "Add team invitations", expect: [TeamService, TokenService, EmailService, TeamRepository], split: tune}
+  - {request: "Let users change their email address", expect: [UserService, EmailVerificationService, TokenService, UserRepository], split: tune}
+  - {request: "Send a welcome email after registration", expect: [EmailService, UserService, AuthController], split: holdout}
+  - {request: "Expire old password reset tokens every night", expect: [TokenService, TokenRepository, PasswordResetService], split: tune}
+  - {request: "Remove a member from a team", expect: [TeamService, TeamRepository, TeamController], split: tune}
+  - {request: "Rate limit password reset requests", expect: [PasswordResetService, AuthController, authRoutes], split: holdout}
+  - {request: "Validate the profile update request body", expect: [UserController, validate, userRoutes], split: tune}
+  - {request: "Return 404 when a team does not exist", expect: [TeamService, NotFoundError], split: holdout}
+  - {request: "Add an audit log of team membership changes", expect: [TeamService, TeamRepository], split: tune}
+  - {request: "Resend the email verification link", expect: [EmailVerificationService, TokenService, EmailService], split: tune}
+  - {request: "Switch the SMTP email provider", expect: [EmailClient, EmailService], split: holdout}
+  - {request: "Store tokens in Redis again", expect: [TokenRepository, TokenService], split: tune}
+  - {request: "Transfer team ownership to another member", expect: [TeamService, TeamRepository, TeamController], split: holdout}
+  - {request: "Show the list of team members", expect: [TeamService, TeamController, TeamRepository], split: tune}
+  - {request: "Require authentication on the user profile routes", expect: [requireAuth, userRoutes], split: holdout}
+  - {request: "Map validation errors to HTTP 400 responses", expect: [ValidationError, errorMiddleware, validate], split: tune}
+  - {request: "Hash passwords before saving new users", expect: [UserService, UserRepository], split: holdout}
+  - {request: "Add email templates for team invites", expect: [EmailService, EmailClient], split: tune}
+  - {request: "Delete a user account", expect: [UserService, UserRepository, UserController], split: holdout}
+  - {request: "Let a signed in user change their password", expect: [PasswordResetService, UserRepository], split: tune}
+  - {request: "Add a createdAt column to teams", expect: [teams, TeamRepository], split: holdout}
+  - {request: "Consume one-time codes for two factor login", expect: [TokenService, TokenRepository], split: tune}
+  - {request: "Paginate the team members endpoint", expect: [TeamController, TeamRepository, teamRoutes], split: holdout}
+  - {request: "Notify team owners by email when someone joins", expect: [EmailService, TeamService], split: holdout}
+  - {request: "Verify a user's email address", expect: [EmailVerificationService, AuthController], split: holdout}

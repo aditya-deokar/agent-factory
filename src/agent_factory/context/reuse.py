@@ -21,13 +21,28 @@ from ..db.stores import Neo4jStore
 from .query import singular
 from .retrievers import fulltext_symbols, lucene_query
 
-WEIGHTS = {"vector": 0.35, "name": 0.25, "methods": 0.25, "maturity": 0.10, "pattern": 0.05}
+WEIGHTS = {"vector": 0.30, "name": 0.25, "methods": 0.25, "maturity": 0.10, "pattern": 0.05, "role": 0.05}
 REUSE_AT, EXTEND_AT = 0.70, 0.50
-ROLE_WORDS = {"service", "repository", "repo", "controller", "manager", "helper", "util", "utils", "handler",
-              "provider", "client", "store", "impl", "base", "factory"}
+ROLE_WORDS = {
+    "service",
+    "repository",
+    "repo",
+    "controller",
+    "manager",
+    "helper",
+    "util",
+    "utils",
+    "handler",
+    "provider",
+    "client",
+    "store",
+    "impl",
+    "base",
+    "factory",
+}
 VERBS: dict[str, set[str]] = {
     "create": {"create", "issue", "generate", "mint", "make", "add", "insert", "new", "register"},
-    "validate": {"validate", "verify", "check", "find", "lookup", "get", "read", "fetch", "load"},
+    "validate": {"validate", "verify", "confirm", "check", "find", "lookup", "get", "read", "fetch", "load"},
     "consume": {"consume", "redeem", "use", "burn", "accept", "claim"},
     "expire": {"expire", "revoke", "invalidate", "purge", "cleanup", "delete", "remove", "cancel"},
     "send": {"send", "dispatch", "deliver", "notify", "email", "mail"},
@@ -85,10 +100,41 @@ def normalize_verb(method: str) -> str | None:
 
 # True synonyms only (not associations): used to compare names, so "MailerService" matches "EmailService".
 NAME_SYNONYMS = {
-    "mailer": "email", "mail": "email", "emailer": "email", "invite": "invitation", "repo": "repository",
-    "auth": "authentication", "authn": "authentication", "org": "organization", "account": "user",
-    "notifier": "notification", "msg": "message", "cfg": "config", "configuration": "config",
-    "otp": "token", "nonce": "token", "pwd": "password", "passwd": "password",
+    "mailer": "email",
+    "mail": "email",
+    "emailer": "email",
+    "invite": "invitation",
+    "repo": "repository",
+    "auth": "authentication",
+    "authn": "authentication",
+    "org": "organization",
+    "account": "user",
+    "notifier": "notification",
+    "msg": "message",
+    "cfg": "config",
+    "configuration": "config",
+    "otp": "token",
+    "nonce": "token",
+    "code": "token",
+    "pwd": "password",
+    "passwd": "password",
+    "smtp": "email",
+    "confirm": "verification",
+    "confirmation": "verification",
+    "verify": "verification",
+}
+ROLE_SUFFIXES = {
+    "service": "Service",
+    "repository": "Repository",
+    "repo": "Repository",
+    "store": "Repository",
+    "controller": "Controller",
+    "client": "Integration",
+    "gateway": "Integration",
+    "adapter": "Integration",
+    "middleware": "Middleware",
+    "worker": "Worker",
+    "validator": "Validator",
 }
 
 
@@ -98,13 +144,20 @@ def core_tokens(name: str) -> set[str]:
     return core or tokens
 
 
-def name_similarity(proposed: str, existing: str) -> float:
+def name_similarity(proposed: str, existing: str, description: str = "") -> float:
     a, b = core_tokens(proposed), core_tokens(existing)
     if not a or not b:
         return 0.0
     jaccard = len(a & b) / len(a | b)
     containment = len(a & b) / len(b)  # how much of the existing name the proposal repeats
-    return round(max(jaccard, 0.9 * containment), 3)
+    described = {NAME_SYNONYMS.get(singular(w), singular(w)) for w in split_words(description)} | a
+    in_description = len(b & described) / len(b)  # the existing name is what the proposal says it does
+    return round(max(jaccard, 0.9 * containment, 0.8 * in_description), 3)
+
+
+def inferred_role(name: str) -> str | None:
+    words = split_words(name)
+    return ROLE_SUFFIXES.get(singular(words[-1])) if words else None
 
 
 def method_overlap(proposed: list[str], existing: list[str]) -> float:
@@ -161,13 +214,18 @@ class ReuseDetector:
         if query_vec is not None:
             rows = self.store.read(
                 "CALL db.index.vector.queryNodes('af_symbol_embedding', 60, $v) YIELD node, score "
-                "WHERE node.project_id = $p RETURN node.uid AS uid", v=query_vec, p=self.project_id)
+                "WHERE node.project_id = $p RETURN node.uid AS uid",
+                v=query_vec,
+                p=self.project_id,
+            )
             uids += [r["uid"] for r in rows]
         verbs = {normalize_verb(m) for m in p.methods} - {None}
         if verbs:
             rows = self.store.read(
                 "MATCH (s:Symbol {project_id: $p}) WHERE s.kind = 'class' AND size(coalesce(s.methods, [])) > 0 "
-                "RETURN s.uid AS uid, s.methods AS methods", p=self.project_id)
+                "RETURN s.uid AS uid, s.methods AS methods",
+                p=self.project_id,
+            )
             uids += [r["uid"] for r in rows if method_overlap(p.methods, r["methods"]) >= 0.5]
         return list(dict.fromkeys(uids))
 
@@ -196,36 +254,58 @@ class ReuseDetector:
             validated_pattern = any(x["status"] == "validated" for x in patterns)
             features = {
                 "vector": round(vec, 3),
-                "name": name_similarity(p.name, row["name"]),
+                "name": name_similarity(p.name, row["name"], p.description),
                 "methods": method_overlap(p.methods or split_words(p.description), row["methods"]),
                 "maturity": maturity(len(row["users"])),
                 "pattern": 1.0 if validated_pattern else 0.0,
+                "role": 1.0 if (p.role or inferred_role(p.name)) in row["roles"] else 0.0,
             }
             score = round(sum(WEIGHTS[k] * v for k, v in features.items()), 3)
             lifecycle = next((x["claim"] for x in patterns if x.get("detector") == "lifecycle_verbs"), None)
             if lifecycle is None and len({normalize_verb(m) for m in row["methods"]} & set(LIFECYCLES["token"])) >= 3:
                 lifecycle = " → ".join(m for m in row["methods"] if normalize_verb(m) in LIFECYCLES["token"])
-            candidates.append(ReuseCandidate(
-                uid=row["uid"], name=row["name"], kind=row["kind"], role=(row["roles"] or [None])[0], path=row["path"],
-                line=row["line"], score=score, verdict=verdict_for(score), features=features,
-                methods=list(row["methods"]), used_by=sorted(row["users"]), lifecycle=lifecycle,
-                patterns=[x["title"] for x in patterns], knowledge=sorted({k for k in row["knowledge"] if k}),
-            ))
+            candidates.append(
+                ReuseCandidate(
+                    uid=row["uid"],
+                    name=row["name"],
+                    kind=row["kind"],
+                    role=(row["roles"] or [None])[0],
+                    path=row["path"],
+                    line=row["line"],
+                    score=score,
+                    verdict=verdict_for(score),
+                    features=features,
+                    methods=list(row["methods"]),
+                    used_by=sorted(row["users"]),
+                    lifecycle=lifecycle,
+                    patterns=[x["title"] for x in patterns],
+                    knowledge=sorted({k for k in row["knowledge"] if k}),
+                )
+            )
         candidates.sort(key=lambda c: (-c.score, c.name))
         candidates = candidates[:limit]
         verdict = candidates[0].verdict if candidates else "new_ok"
-        return ReuseReport(proposed=p, verdict=verdict, recommendation=_recommend(p, candidates),
-                           candidates=candidates, warnings=warnings)
+        return ReuseReport(
+            proposed=p,
+            verdict=verdict,
+            recommendation=_recommend(p, candidates),
+            candidates=candidates,
+            warnings=warnings,
+        )
 
 
 def _recommend(p: ProposedAbstraction, cands: list[ReuseCandidate]) -> str:
     if not cands or cands[0].verdict == "new_ok":
-        return (f"No existing implementation covers {p.name}. A new abstraction looks justified; "
-                "say why in the plan and follow the validated patterns for its role.")
+        return (
+            f"No existing implementation covers {p.name}. A new abstraction looks justified; "
+            "say why in the plan and follow the validated patterns for its role."
+        )
     top = cands[0]
     if top.verdict == "reuse":
-        return (f"Evaluate whether {top.name} can support this (e.g. a new purpose or parameter) "
-                f"before introducing {p.name}.")
+        return (
+            f"Evaluate whether {top.name} can support this (e.g. a new purpose or parameter) "
+            f"before introducing {p.name}."
+        )
     return f"Extend {top.name} (a parameter, a method or a strategy) rather than adding a sibling of it."
 
 

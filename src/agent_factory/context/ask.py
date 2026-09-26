@@ -31,8 +31,9 @@ SCHEMA = """Node labels and key properties (every node has project_id; always fi
   http_method, http_path, table}. Extra labels by role: Service, Repository, Controller, Route, Model, Validator,
   Middleware, Integration, Component, Hook, Worker.
 - File {uid, path, lang} (tests also have label TestFile); Module {uid, path}
-- Knowledge {uid, kind: pattern|decision|constraint, title, claim, status: candidate|validated|deprecated|superseded|rejected,
-  confidence, support_count, violation_count} with extra label Pattern | Decision | Constraint
+- Knowledge {uid, kind: pattern|decision|constraint, title, claim,
+  status: candidate|validated|deprecated|superseded|rejected, confidence, support_count, violation_count}
+  with extra label Pattern | Decision | Constraint
 - Feature {uid, name, request, status}; Commit {sha, message, type, date}; Evidence {path, line_start}
 Relationships:
 (File)-[:DEFINES]->(Symbol), (Symbol)-[:HAS_MEMBER]->(Symbol method), (Symbol)-[:USES]->(Symbol),
@@ -53,7 +54,8 @@ EXAMPLES = [
     "MATCH (r:Symbol {project_id: $project_id, name: 'TokenRepository'})-[:HAS_MEMBER*0..1]->()-[a:ACCESSES]->"
     "(m:Symbol:Model) RETURN DISTINCT m.table AS table, collect(DISTINCT a.op) AS ops",
     "USER INPUT: 'List validated constraints' QUERY: "
-    "MATCH (k:Constraint {project_id: $project_id, status: 'validated'}) RETURN k.title AS title, k.confidence AS confidence",
+    "MATCH (k:Constraint {project_id: $project_id, status: 'validated'}) "
+    "RETURN k.title AS title, k.confidence AS confidence",
     "USER INPUT: 'Which routes have no validation?' QUERY: "
     "MATCH (r:Symbol:Route {project_id: $project_id}) WHERE r.validated = false "
     "RETURN r.http_method + ' ' + r.http_path AS route",

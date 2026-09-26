@@ -61,8 +61,9 @@ class GraphRagEmbedder(GraphRagEmbedderBase):
 
 def _metadata(record: Any) -> RetrieverResultItem:
     data = record.data()
-    return RetrieverResultItem(content=json.dumps({k: v for k, v in data.items() if k != "embedding"}, default=str),
-                               metadata=data)
+    return RetrieverResultItem(
+        content=json.dumps({k: v for k, v in data.items() if k != "embedding"}, default=str), metadata=data
+    )
 
 
 VECTOR_SYMBOL_QUERY = """
@@ -86,8 +87,12 @@ RETURN node.uid AS uid, d.path AS path, node.heading AS heading, left(node.text,
 
 def vector_symbols(store: Neo4jStore, project_id: str, embedder: Embedder, text: str, k: int = 20) -> list[Hit]:
     retriever = VectorCypherRetriever(
-        store.driver, index_name="af_symbol_embedding", retrieval_query=VECTOR_SYMBOL_QUERY,
-        embedder=GraphRagEmbedder(embedder), result_formatter=_metadata, neo4j_database=store.database,
+        store.driver,
+        index_name="af_symbol_embedding",
+        retrieval_query=VECTOR_SYMBOL_QUERY,
+        embedder=GraphRagEmbedder(embedder),
+        result_formatter=_metadata,
+        neo4j_database=store.database,
     )
     result = retriever.search(query_text=text, top_k=k * OVERSAMPLE, query_params={"project_id": project_id})
     best: dict[str, Hit] = {}
@@ -104,16 +109,28 @@ def vector_symbols(store: Neo4jStore, project_id: str, embedder: Embedder, text:
 
 def vector_docs(store: Neo4jStore, project_id: str, embedder: Embedder, text: str, k: int = 6) -> list[DocHit]:
     retriever = VectorCypherRetriever(
-        store.driver, index_name="af_chunk_embedding", retrieval_query=VECTOR_CHUNK_QUERY,
-        embedder=GraphRagEmbedder(embedder), result_formatter=_metadata, neo4j_database=store.database,
+        store.driver,
+        index_name="af_chunk_embedding",
+        retrieval_query=VECTOR_CHUNK_QUERY,
+        embedder=GraphRagEmbedder(embedder),
+        result_formatter=_metadata,
+        neo4j_database=store.database,
     )
     result = retriever.search(query_text=text, top_k=k * OVERSAMPLE, query_params={"project_id": project_id})
     hits = []
     for item in result.items:
         m = item.metadata or {}
         if m.get("uid"):
-            hits.append(DocHit(m["uid"], m["path"], m.get("heading") or "", m.get("excerpt") or "",
-                               float(m.get("score") or 0.0), list(m.get("describes") or [])))
+            hits.append(
+                DocHit(
+                    m["uid"],
+                    m["path"],
+                    m.get("heading") or "",
+                    m.get("excerpt") or "",
+                    float(m.get("score") or 0.0),
+                    list(m.get("describes") or []),
+                )
+            )
     return hits[:k]
 
 
@@ -173,20 +190,23 @@ def code_search(root: Path, store: Neo4jStore, project_id: str, terms: list[str]
     matches: dict[tuple[str, int], set[str]] = defaultdict(set)
     rg = shutil.which("rg")
     pattern = re.compile(r"(?i)(" + "|".join(map(re.escape, terms)) + r")")
-    code_paths = [r["path"] for r in store.read(
-        "MATCH (f:File {project_id: $p}) WHERE NOT f:TestFile RETURN f.path AS path", p=project_id)]
+    code_paths = [
+        r["path"]
+        for r in store.read("MATCH (f:File {project_id: $p}) WHERE NOT f:TestFile RETURN f.path AS path", p=project_id)
+    ]
     if rg:
         args = [rg, "--json", "-i", "--max-count", "200"]
         for t in terms:
             args += ["-e", re.escape(t)]
         for ext in ("ts", "tsx", "js", "jsx", "mjs", "cjs", "py"):
             args += ["-g", f"*.{ext}"]
-        out = subprocess.run(args + ["."], cwd=root, capture_output=True, text=True, encoding="utf-8",
-                             errors="replace", check=False).stdout
+        out = subprocess.run(
+            [*args, "."], cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
+        ).stdout
         wanted = set(code_paths)
-        for line in out.splitlines():
+        for raw in out.splitlines():
             try:
-                event = json.loads(line)
+                event = json.loads(raw)
             except json.JSONDecodeError:
                 continue
             if event.get("type") != "match":
@@ -209,8 +229,8 @@ def code_search(root: Path, store: Neo4jStore, project_id: str, terms: list[str]
                     matches[(path, i)] |= found
     spans = _symbol_spans(store, project_id, sorted({p for p, _ in matches}))
     per_symbol: dict[str, tuple[set[str], int]] = {}
-    for (path, line), found in matches.items():
-        uid = _enclosing(spans.get(path, []), line)
+    for (path, line_no), found in matches.items():
+        uid = _enclosing(spans.get(path, []), line_no)
         if uid is None:
             continue
         seen, count = per_symbol.get(uid, (set(), 0))

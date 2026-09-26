@@ -1,0 +1,90 @@
+# serializer version: 1
+# name: test_render_markdown_snapshot
+  '''
+  # Context for: Add team invitations
+  
+  ## Reusable implementations
+  - **Service0** (Service) — `src/s0.ts:3`
+    methods: create, validate
+    already used by: A, B
+  - **Service1** (Service) — `src/s1.ts:3`
+    methods: create, validate
+    already used by: A, B
+  - **Service2** (Service) — `src/s2.ts:3`
+    methods: create, validate
+    already used by: A, B
+  - **Service3** (Service) — `src/s3.ts:3`
+    methods: create, validate
+    already used by: A, B
+  - **Service4** (Service) — `src/s4.ts:3`
+    methods: create, validate
+    already used by: A, B
+  - **Service5** (Service) — `src/s5.ts:3`
+    methods: create, validate
+    already used by: A, B
+  - **Service6** (Service) — `src/s6.ts:3`
+    methods: create, validate
+    already used by: A, B
+  
+  ## Patterns to follow
+  - **Rule number 0 word word word word word word word word word word word word word word word word word word word word ** (validated; confidence 0.9; support 5)
+  - **Rule number 1 word word word word word word word word word word word word word word word word word word word word ** (validated; confidence 0.9; support 5)
+  - **Rule number 2 word word word word word word word word word word word word word word word word word word word word ** (validated; confidence 0.9; support 5)
+  - **Rule number 3 word word word word word word word word word word word word word word word word word word word word ** (validated; confidence 0.9; support 5)
+  - **Rule number 4 word word word word word word word word word word word word word word word word word word word word ** (validated; confidence 0.9; support 5)
+  
+  ## Constraints (must not be violated)
+  - **Rule number 0 word word word word word word word word word word word word word word word word word word word word ** (validated; confidence 0.9; support 5)
+  - **Rule number 1 word word word word word word word word word word word word word word word word word word word word ** (validated; confidence 0.9; support 5)
+  - **Rule number 2 word word word word word word word word word word word word word word word word word word word word ** (validated; confidence 0.9; support 5)
+  - **Rule number 3 word word word word word word word word word word word word word word word word word word word word ** (validated; confidence 0.9; support 5)
+  - **Rule number 4 word word word word word word word word word word word word word word word word word word word word ** (validated; confidence 0.9; support 5)
+  - **Rule number 5 word word word word word word word word word word word word word word word word word word word word ** (validated; confidence 0.9; support 5)
+  
+  ## Unverified observations (candidates — not rules)
+  - **Rule number 0 word word word word word word word word word word word word word word word word word word word word ** (candidate; confidence 0.9; support 5)
+  - **Rule number 1 word word word word word word word word word word word word word word word word word word word word ** (candidate; confidence 0.9; support 5)
+  - **Rule number 2 word word word word word word word word word word word word word word word word word word word word ** (candidate; confidence 0.9; support 5)
+  - **Rule number 3 word word word word word word word word word word word word word word word word word word word word ** (candidate; confidence 0.9; support 5)
+  - **Rule number 4 word word word word word word word word word word word word word word word word word word word word ** (candidate; confidence 0.9; support 5)
+  - **Rule number 5 word word word word word word word word word word word word word word word word word word word word ** (candidate; confidence 0.9; support 5)
+  - **Rule number 6 word word word word word word word word word word word word word word word word word word word word ** (candidate; confidence 0.9; support 5)
+  - **Rule number 7 word word word word word word word word word word word word word word word word word word word word ** (candidate; confidence 0.9; support 5)
+  
+  ## Plan skeleton (fill in before editing — spec §18)
+  
+  ```text
+  FEATURE PLAN
+  Feature: Add team invitations
+  Existing Architecture:
+  - (see above)
+  Existing Implementations:
+  - Service0 (`src/s0.ts:3`)
+  - Service1 (`src/s1.ts:3`)
+  - Service2 (`src/s2.ts:3`)
+  - Service3 (`src/s3.ts:3`)
+  - Service4 (`src/s4.ts:3`)
+  - Service5 (`src/s5.ts:3`)
+  Reusable Patterns:
+  - Rule number 0 word word word word word word word word word word word word word word word word word word word word 
+  - Rule number 1 word word word word word word word word word word word word word word word word word word word word 
+  - Rule number 2 word word word word word word word word word word word word word word word word word word word word 
+  - Rule number 3 word word word word word word word word word word word word word word word word word word word word 
+  - Rule number 4 word word word word word word word word word word word word word word word word word word word word 
+  Potential Files:
+  - src/s0.ts
+  - src/s1.ts
+  - src/s2.ts
+  - src/s3.ts
+  - src/s4.ts
+  - src/s5.ts
+  - src/s6.ts
+  New Abstractions: to decide (run find_reusable for each one)
+  Architectural Decision: to decide
+  Risks: to decide
+  ```
+  
+  _Trimmed to fit 900 tokens: reusable: Service7, reusable: Service8, reusable: Service9, reusable: Service10, reusable: Service11, reusable: Service12, reusable: Service13, reusable: Service14, reusable: Service15, reusable: Service16, reusable: Service17, reusable: Service18. Ask for more with a larger budget._
+  
+  '''
+# ---

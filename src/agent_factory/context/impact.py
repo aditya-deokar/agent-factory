@@ -96,8 +96,10 @@ def analyze(store: Neo4jStore, project_id: str, ref: str, depth: int = 2) -> Imp
     up = store.read(UPSTREAM % depth, uid=uid, p=project_id)
     down = store.read(DOWNSTREAM, uid=uid)
     ctx = store.read(CONTEXT, uid=uid)[0]
-    member_uids = [uid] + [r["uid"] for r in store.read(
-        "MATCH (:Symbol {uid: $uid})-[:HAS_MEMBER]->(m:Symbol) RETURN m.uid AS uid", uid=uid)]
+    member_uids = [uid] + [
+        r["uid"]
+        for r in store.read("MATCH (:Symbol {uid: $uid})-[:HAS_MEMBER]->(m:Symbol) RETURN m.uid AS uid", uid=uid)
+    ]
     route_rows = store.read(
         """
         MATCH (r:Symbol:Route {project_id: $p})-[:HANDLES]->(h:Symbol)
@@ -110,21 +112,34 @@ def analyze(store: Neo4jStore, project_id: str, ref: str, depth: int = 2) -> Imp
     dependent_uids = [r["uid"] for r in up]
     tests = set(ctx["tests"])
     if dependent_uids:
-        tests |= {r["path"] for r in store.read(
-            "UNWIND $u AS uid MATCH (tf:TestFile)-[:COVERS]->(:Symbol {uid: uid}) RETURN DISTINCT tf.path AS path",
-            u=dependent_uids)}
+        tests |= {
+            r["path"]
+            for r in store.read(
+                "UNWIND $u AS uid MATCH (tf:TestFile)-[:COVERS]->(:Symbol {uid: uid}) RETURN DISTINCT tf.path AS path",
+                u=dependent_uids,
+            )
+        }
 
     def entry(r: dict[str, Any]) -> ImpactEntry:
-        return ImpactEntry(uid=r["uid"], name=r["name"], kind=r.get("kind"), role=(r.get("roles") or [None])[0],
-                           path=r.get("path"), line=r.get("line"), hops=r.get("hops"))
+        return ImpactEntry(
+            uid=r["uid"],
+            name=r["name"],
+            kind=r.get("kind"),
+            role=(r.get("roles") or [None])[0],
+            path=r.get("path"),
+            line=r.get("line"),
+            hops=r.get("hops"),
+        )
 
     return ImpactReport(
         target=entry(target),
         depth=depth,
         dependents=[entry(r) for r in up if r["kind"] != "route"],
         dependencies=[entry(r) for r in down],
-        routes=sorted({f"{r['http_method']} {r['http_path']}" for r in up if r["kind"] == "route"}
-                      | {r["route"] for r in route_rows if r["route"]}),
+        routes=sorted(
+            {f"{r['http_method']} {r['http_path']}" for r in up if r["kind"] == "route"}
+            | {r["route"] for r in route_rows if r["route"]}
+        ),
         tests=sorted(tests),
         co_changes=sorted((c for c in ctx["co_changes"] if c.get("path")), key=lambda c: -(c["count"] or 0)),
         knowledge=[k for k in ctx["knowledge"] if k.get("uid")],
@@ -148,7 +163,9 @@ def render_impact(rep: ImpactReport) -> str:
     if rep.dependencies:
         lines.append("It depends on: " + ", ".join(d.name for d in rep.dependencies))
     if rep.co_changes:
-        lines.append("Usually changes together with: " + ", ".join(f"{c['path']} ({c['count']}×)" for c in rep.co_changes[:5]))
+        lines.append(
+            "Usually changes together with: " + ", ".join(f"{c['path']} ({c['count']}×)" for c in rep.co_changes[:5])
+        )
     if rep.knowledge:
         lines.append("Rules and patterns in force: " + "; ".join(k["title"] for k in rep.knowledge))
     if rep.features:

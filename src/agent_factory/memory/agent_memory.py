@@ -151,6 +151,12 @@ class AgentMemory:
             await self._client.close()
             self._client = None
 
+    async def _ready(self) -> Any:
+        """Open on first use: callers (MCP tools, CLI) never have to manage the connection."""
+        if self._client is None:
+            await self.open()
+        return self._client
+
     @property
     def client(self) -> Any:
         if self._client is None:
@@ -159,13 +165,13 @@ class AgentMemory:
 
     async def add_message(self, session_id: str, role: str, content: str) -> None:
         _guard(content)
-        await self.client.short_term.add_message(
+        await (await self._ready()).short_term.add_message(
             session_id, role, content, extract_entities=False, extract_relations=False
         )
 
     async def start_trace(self, session_id: str, task: str) -> str:
         _guard(task)
-        trace = await self.client.reasoning.start_trace(session_id, task)
+        trace = await (await self._ready()).reasoning.start_trace(session_id, task)
         return str(trace.id)
 
     async def add_step(
@@ -178,18 +184,22 @@ class AgentMemory:
         result_summary: str | None = None,
     ) -> None:
         _guard(thought, result_summary, *(str(v) for v in (arguments or {}).values()))
-        step = await self.client.reasoning.add_step(
+        step = await (await self._ready()).reasoning.add_step(
             trace_id, thought=thought, action=action, observation=result_summary
         )
         if tool_name:
-            await self.client.reasoning.record_tool_call(step.id, tool_name, arguments or {}, result=result_summary)
+            await (await self._ready()).reasoning.record_tool_call(
+                step.id, tool_name, arguments or {}, result=result_summary
+            )
 
     async def complete_trace(self, trace_id: str, outcome: str, success: bool) -> None:
         _guard(outcome)
-        await self.client.reasoning.complete_trace(trace_id, outcome=outcome, success=success)
+        await (await self._ready()).reasoning.complete_trace(trace_id, outcome=outcome, success=success)
 
     async def similar_traces(self, task: str, limit: int = 3) -> list[TraceSummary]:
-        traces = await self.client.reasoning.get_similar_traces(task, limit=limit, success_only=False, threshold=0.3)
+        traces = await (await self._ready()).reasoning.get_similar_traces(
+            task, limit=limit, success_only=False, threshold=0.3
+        )
         out = []
         for t in traces:
             steps = [s.thought or s.action or "" for s in (getattr(t, "steps", None) or [])]
@@ -198,18 +208,18 @@ class AgentMemory:
 
     async def save_fact(self, subject: str, predicate: str, obj: str) -> None:
         _guard(subject, predicate, obj)
-        await self.client.long_term.add_fact(subject, predicate, obj)
+        await (await self._ready()).long_term.add_fact(subject, predicate, obj)
 
     async def save_preference(self, category: str, preference: str) -> None:
         _guard(category, preference)
-        await self.client.long_term.add_preference(category, preference)
+        await (await self._ready()).long_term.add_preference(category, preference)
 
     async def recall_preferences(self, topic: str, limit: int = 10) -> list[str]:
-        prefs = await self.client.long_term.search_preferences(topic, limit=limit, threshold=0.3)
+        prefs = await (await self._ready()).long_term.search_preferences(topic, limit=limit, threshold=0.3)
         return [p.preference for p in prefs]
 
     async def context(self, query: str, session_id: str) -> str:
-        return str(await self.client.get_context(query, session_id=session_id))
+        return str(await (await self._ready()).get_context(query, session_id=session_id))
 
 
 def make_agent_memory(

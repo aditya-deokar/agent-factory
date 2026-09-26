@@ -294,12 +294,20 @@ def _embed(
         if targets:
             vectors = embedder.embed([s.props["card"] for s in targets])
             code.set_embeddings(
-                Label.SYMBOL, [{"uid": s.uid, "embedding": v, "model": embedder.model} for s, v in zip(targets, vectors, strict=True)]
+                Label.SYMBOL,
+                [
+                    {"uid": s.uid, "embedding": v, "model": embedder.model}
+                    for s, v in zip(targets, vectors, strict=True)
+                ],
             )
         if chunks:
             vectors = embedder.embed([t for _, t in chunks])
             code.set_embeddings(
-                Label.DOC_CHUNK, [{"uid": u, "embedding": v, "model": embedder.model} for (u, _), v in zip(chunks, vectors, strict=True)]
+                Label.DOC_CHUNK,
+                [
+                    {"uid": u, "embedding": v, "model": embedder.model}
+                    for (u, _), v in zip(chunks, vectors, strict=True)
+                ],
             )
     except EmbeddingUnavailable as error:
         warnings.append(f"embeddings skipped: {error}")
