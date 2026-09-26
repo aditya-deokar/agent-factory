@@ -7,6 +7,8 @@ an Agent Factory section in AGENTS.md.
 
 from __future__ import annotations
 
+import os
+import re
 import shutil
 import subprocess
 from dataclasses import dataclass, field
@@ -150,6 +152,25 @@ def _mcp_servers(opts: InitOptions, vscode: bool) -> dict[str, Any]:
     return servers
 
 
+def detect_aura_instance(root: Path) -> str | None:
+    """Extract Aura instance ID from NEO4J_URI in environment or .env file."""
+    uri = os.environ.get("NEO4J_URI", "")
+    if not uri and (root / ".env").exists():
+        try:
+            for line in (root / ".env").read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if line.startswith("NEO4J_URI="):
+                    uri = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    break
+        except Exception:
+            pass
+    if uri:
+        m = re.search(r"neo4j\+s://([a-zA-Z0-9]+)\.databases\.neo4j\.io", uri)
+        if m:
+            return m.group(1)
+    return None
+
+
 def run_init(root: Path, opts: InitOptions) -> InitResult:
     unknown = sorted(set(opts.agents) - set(SUPPORTED_AGENTS))
     if unknown:
@@ -157,6 +178,12 @@ def run_init(root: Path, opts: InitOptions) -> InitResult:
     actions: list[Action] = []
     notes: list[str] = []
     dry = opts.dry_run
+
+    if not opts.aura_instance:
+        detected = detect_aura_instance(root)
+        if detected:
+            opts.aura_instance = detected
+            notes.append(f"Auto-detected hosted Neo4j Aura instance '{detected}'; added neo4j-aura MCP endpoint.")
 
     cfg_path = root / CONFIG_FILENAME
     if cfg_path.exists():

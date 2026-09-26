@@ -145,6 +145,14 @@ def build_server(factory: Callable[[], Runtime]) -> MCPServer:
         return await traced("get_feature_context", {"request": request}, feature_id, work)
 
     @server.tool(annotations=READ)
+    async def get_memory_context(
+        request: str, budget_tokens: int = 4000, feature_id: str | None = None
+    ) -> dict[str, Any]:
+        """Alias for get_feature_context: call before implementing a feature or bug fix to retrieve
+        architecture, reusable implementations, patterns, decisions, constraints and tests."""
+        return await get_feature_context(request=request, budget_tokens=budget_tokens, feature_id=feature_id)
+
+    @server.tool(annotations=READ)
     async def find_reusable(
         name: str,
         description: str = "",
@@ -300,6 +308,20 @@ def build_server(factory: Callable[[], Runtime]) -> MCPServer:
             for r in rows
         )
         return fit({"summary": summary or "No similar tasks recorded yet.", "data": {"traces": rows}})
+
+    @server.tool(annotations=READ)
+    async def how_did_i_handle(task: str) -> dict[str, Any]:
+        """Alias for how_did_we_handle: retrieve how similar tasks were solved previously in this repository."""
+        return await how_did_we_handle(task=task)
+
+    @server.tool(annotations=READ)
+    async def get_token_savings(request: str, budget_tokens: int = 4000) -> dict[str, Any]:
+        """Calculate the token economy and surgical retrieval efficiency for a given feature request."""
+        pack = await audited().engine().abuild(request, budget=max(500, min(budget_tokens, 20_000)))
+        if pack.token_economy is None:
+            return fit({"summary": "Token economy metrics not available for this pack.", "data": None})
+        summary = f"{pack.token_economy.to_markdown_badge()}\n\n{pack.token_economy.to_markdown_table()}"
+        return fit({"summary": summary, "data": pack.token_economy.to_dict()})
 
     @server.tool(annotations=READ)
     async def get_feature(feature_id: str | None = None) -> dict[str, Any]:

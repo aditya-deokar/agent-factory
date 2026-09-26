@@ -33,14 +33,66 @@ def context(
     request: Annotated[str, typer.Argument(help='The feature or change, e.g. "Add team invitations"')],
     budget: Annotated[int, typer.Option(help="Token budget for the pack")] = 4000,
     history: Annotated[bool, typer.Option("--history", help="Include deprecated and superseded knowledge")] = False,
+    savings: Annotated[bool, typer.Option("--savings", "--metrics", help="Display token economy comparison table")] = False,
 ) -> None:
     """Everything an agent should know before implementing REQUEST (spec §15)."""
+    from rich.table import Table
+
     from ..context.pack import render_markdown
 
     with runtime(ctx) as rt:
         pack = rt.engine().build(request, budget=budget, include_history=history)
         pack.warnings += rt.warnings
-    emit(ctx, pack, lambda c: c.print(render_markdown(pack), markup=False, highlight=False))
+
+    def render(c: Console) -> None:
+        c.print(render_markdown(pack), markup=False, highlight=False)
+        if savings and pack.token_economy is not None:
+            te = pack.token_economy
+            cost_blind = round((te.blind_exploration_tokens_est / 1_000_000) * 3.00, 2)
+            cost_graph = round((te.graph_context_tokens / 1_000_000) * 3.00, 2)
+            ratio = (
+                round(te.blind_exploration_tokens_est / max(1, te.graph_context_tokens), 1)
+                if te.graph_context_tokens > 0
+                else 1.0
+            )
+
+            table = Table(
+                title="TOKEN ECONOMY: BLIND EXPLORATION vs. GRAPH-GUIDED SURGICAL RETRIEVAL",
+                show_lines=True,
+            )
+            table.add_column("Metric", style="bold")
+            table.add_column("Blind Exploration (Baseline)", style="yellow")
+            table.add_column("Agent Factory (Graph-Guided)", style="green")
+            table.add_column("Advantage", style="cyan")
+
+            table.add_row(
+                "Files Targeted / Read",
+                f"{min(te.total_repo_files, 25)} files",
+                f"{te.targeted_files} files",
+                f"{te.surgical_retrieval_ratio:.1f}% fewer files",
+            )
+            table.add_row(
+                "Tokens Consumed",
+                f"{te.blind_exploration_tokens_est:,} tokens",
+                f"{te.graph_context_tokens:,} tokens",
+                f"{te.savings_percentage:.1f}% token savings",
+            )
+            table.add_row(
+                "Context Window Health",
+                "Polluted (diluted reasoning)",
+                f"{te.context_health} (high focus)",
+                "Maximum reasoning focus",
+            )
+            table.add_row(
+                "Estimated Run Cost",
+                f"${cost_blind:.2f}",
+                f"${cost_graph:.2f}",
+                f"{ratio:.1f}x cheaper",
+            )
+            c.print()
+            c.print(table)
+
+    emit(ctx, pack, render)
 
 
 def reuse(

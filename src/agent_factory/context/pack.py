@@ -8,6 +8,9 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
+from .token_economy import TokenEconomyReport
+
+
 @lru_cache(maxsize=1)
 def _encoder() -> Any:
     try:
@@ -123,6 +126,7 @@ class ContextPack(BaseModel):
     unverified: list[KnowledgeItem] = Field(default_factory=list)
     budget: BudgetReport = Field(default_factory=lambda: BudgetReport(limit=0))
     warnings: list[str] = Field(default_factory=list)
+    token_economy: TokenEconomyReport | None = None
 
     def relevant_symbols(self) -> list[str]:
         return [s.name for s in self.reusable]
@@ -246,6 +250,8 @@ def _memory_md(m: MemoryItem) -> str:
 
 def render_markdown(pack: ContextPack) -> str:
     out = [f"# Context for: {pack.request}", ""]
+    if pack.token_economy is not None:
+        out += [pack.token_economy.to_markdown_badge(), ""]
 
     def section(title: str, key: str, empty: str | None = None) -> None:
         items = getattr(pack, key)

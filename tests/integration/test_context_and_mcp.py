@@ -152,6 +152,7 @@ def test_eval_gates(runtime):
 
 READ_TOOLS = {
     "get_feature_context",
+    "get_memory_context",
     "find_reusable",
     "impact_of",
     "get_constraints",
@@ -159,8 +160,10 @@ READ_TOOLS = {
     "search_memory",
     "ask_graph",
     "how_did_we_handle",
+    "how_did_i_handle",
     "get_feature",
     "check_changes",
+    "get_token_savings",
 }
 
 

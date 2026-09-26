@@ -19,7 +19,6 @@ from ..auditor.graphview import GraphView, Sym
 from ..auditor.model import EdgeRow, NodeRow, ParsedFile, SourceFile
 from ..auditor.parsers import parse_source
 from ..auditor.resolve import Resolver
-from ..auditor.walker import walk_files
 from ..common.paths import git
 from ..common.redact import redact
 from ..schema.model import Rel, Role

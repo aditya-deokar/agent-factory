@@ -31,8 +31,7 @@ AGENT_FACTORY_SKILLS = {
     "pr-evidence",
     "memory-commit",
 }
-# Referenced by skills already, implemented in Phase 8 (guardrails + evidence engine). Remove as they land.
-PHASE_8_PENDING = {("evidence", "collect"), ("pr-body",)}
+PHASE_8_PENDING: set[tuple[str, ...]] = set()
 TOOL_NAME = re.compile(r"`((?:get|find|impact|search|ask|how|start|record|propose|check|add|complete)_[a-z_]+)`")
 MCP_REF = re.compile(r"mcp__agent-factory__([a-z_]+)")
 CLI_REF = re.compile(r"agent-factory ([a-z][a-z-]*)(?: ([a-z][a-z-]*))?")

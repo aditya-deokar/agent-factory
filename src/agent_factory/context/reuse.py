@@ -67,7 +67,7 @@ class ReuseCandidate(BaseModel):
     line: int | None = None
     score: float
     verdict: str
-    features: dict[str, float]
+    features: dict[str, float] = Field(default_factory=dict)
     methods: list[str] = Field(default_factory=list)
     used_by: list[str] = Field(default_factory=list)
     lifecycle: str | None = None
@@ -78,7 +78,7 @@ class ReuseCandidate(BaseModel):
 class ReuseReport(BaseModel):
     proposed: ProposedAbstraction
     verdict: str
-    recommendation: str
+    recommendation: str = ""
     candidates: list[ReuseCandidate] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
 

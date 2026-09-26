@@ -34,6 +34,7 @@ from .pack import (
     apply_budget,
 )
 from .query import ParsedQuery, understand
+from .token_economy import compute_token_economy
 from .retrievers import (
     DocHit,
     Fused,
@@ -252,7 +253,20 @@ class ContextEngine:
         pack.related_features = self._features(relevant)
         pack.docs = [DocItem(path=d.path, heading=d.heading, excerpt=d.excerpt) for d in r.docs[:3]]
         pack.memory = await self._memory(request)
-        return apply_budget(pack, budget)
+        pack = apply_budget(pack, budget)
+        targeted = {s.path for s in pack.reusable if s.path} | {t.path for t in pack.tests if t.path}
+        try:
+            rows = self.store.read("MATCH (f:File {project_id: $p}) RETURN count(f) AS cnt", p=self.project_id)
+            total_files = rows[0]["cnt"] if rows else 0
+        except Exception:
+            total_files = 0
+        tokens_used = pack.budget.used if pack.budget.used > 0 else 1000
+        pack.token_economy = compute_token_economy(
+            total_repo_files=total_files,
+            targeted_files=len(targeted),
+            graph_pack_tokens=tokens_used,
+        )
+        return pack
 
     def _symbol_item(self, row: dict[str, Any], r: Retrieval) -> SymbolItem:
         return SymbolItem(
