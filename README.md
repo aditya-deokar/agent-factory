@@ -1,23 +1,51 @@
-# Agent Factory
+<p align="center">
+  <img src="assets/agent-factory-logo.png" alt="Agent Factory Logo" width="260" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);" />
+</p>
 
-> **The persistent, graph-backed engineering harness for coding agents.**  
-> *"Don't make the agent remember more. Make the codebase remember more."*
+<h1 align="center">Agent Factory</h1>
 
-[![Token Savings](https://img.shields.io/badge/Token%20Savings-85%25--95%25-blue)]()
-[![Duplicate Abstractions](https://img.shields.io/badge/Duplicate%20Abstractions-0%25%20(100%25%20Eliminated)-brightgreen)]()
-[![Architectural Drift](https://img.shields.io/badge/Architectural%20Drift-Zero%20Violations-brightgreen)]()
-[![Database](https://img.shields.io/badge/Database-Neo4j%205.26%20%7C%20Aura-orange)]()
-[![Protocol](https://img.shields.io/badge/Protocol-Model%20Context%20Protocol%20(MCP)-purple)]()
+<p align="center">
+  <b>The persistent, graph-backed engineering harness for coding agents.</b><br>
+  <i>"Don't make the agent remember more. Make the codebase remember more."</i>
+</p>
+
+<p align="center">
+  <a href="https://neo4j.com/"><img src="https://img.shields.io/badge/Database-Neo4j%205.26%20%7C%20Aura-008CC1?style=for-the-badge&logo=neo4j&logoColor=white" alt="Neo4j" /></a>
+  <a href="https://modelcontextprotocol.io/"><img src="https://img.shields.io/badge/Protocol-MCP%20Standard-6366F1?style=for-the-badge&logoColor=white" alt="MCP" /></a>
+  <img src="https://img.shields.io/badge/Token%20Savings-85%25--95%25-10B981?style=for-the-badge" alt="Token Savings" />
+  <img src="https://img.shields.io/badge/Duplicate%20Abstractions-0%25%20(100%25%20Eliminated)-22C55E?style=for-the-badge" alt="Duplicate Abstractions" />
+  <img src="https://img.shields.io/badge/Architectural%20Drift-Zero%20Violations-059669?style=for-the-badge" alt="Architectural Drift" />
+  <img src="https://img.shields.io/badge/Tests-373%20Passed-blue?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/License-MIT-gray?style=for-the-badge" alt="License" />
+</p>
+
+<p align="center">
+  <a href="#-executive-overview">Overview</a> •
+  <a href="#-problems--solutions">Problems & Solutions</a> •
+  <a href="#-why-graph-thinking-neo4j">Why Neo4j?</a> •
+  <a href="#-harness-architecture">Architecture</a> •
+  <a href="#-the-10-step-lifecycle">Workflow</a> •
+  <a href="#-empirical-benchmarks">Benchmarks</a> •
+  <a href="#-quickstart">Quickstart</a> •
+  <a href="#-mcp-tools--cli-reference">Tools & CLI</a> •
+  <a href="#-documentation--links">Docs</a>
+</p>
 
 ---
 
-## Overview
+## 💡 Executive Overview
 
-Coding agents like **Claude Code**, **Cursor**, **Codex**, and **Antigravity** are exceptional reasoning engines, but they suffer from **session amnesia** and **architectural drift**. Every new task starts from zero: agents burn tens of thousands of tokens grepping files, duplicate existing abstractions, violate layer boundaries, and declare tasks "tested" with zero verifiable proof.
+Coding assistants like **Claude Code**, **Cursor**, **Codex**, and **Antigravity** are exceptional reasoning and code generation engines. However, in enterprise and large-scale codebases, they suffer from two fatal weaknesses: **session amnesia** and **architectural drift**.
 
-**Agent Factory** is a local-first engineering harness that wraps existing coding agents in a persistent, graph-backed memory and verification system:
-- **Claude / Cursor / Codex** = The **Brain** (Reasoning, planning, code generation).
-- **Agent Factory** = The **Harness** (Surgical context, reuse detection, boundary guardrails, cryptographic proof, persistent memory).
+Every new session starts with a blank slate:
+- Agents burn tens of thousands of tokens grepping files and reading whole folders before writing a line of code.
+- They re-invent existing utilities and services, producing code duplication (*"AI Slop"*).
+- They take architectural shortcuts (e.g. controllers querying databases directly), violating system designs.
+- They declare pull requests *"tested and complete"* with zero verifiable, cryptographic proof.
+
+**Agent Factory** solves this by separating the **Brain** from the **Harness**:
+- **The Brain (Claude / Cursor / Codex):** Focuses entirely on high-level reasoning, planning, and code synthesis.
+- **The Harness (Agent Factory):** Supplies surgical GraphRAG context, enforces architectural guardrails, detects duplicate abstractions, and records cryptographic execution evidence.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -45,11 +73,60 @@ Coding agents like **Claude Code**, **Cursor**, **Codex**, and **Antigravity** a
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
+> [!TIP]
+> **Core Philosophy:** *Don't force the LLM to hold your entire repository in its prompt window. Anchor your codebase's topology, rules, and history in a Neo4j Property Graph, and deliver pristine, surgical context on demand.*
+
 ---
 
-## 🏛 Complete Harness Architecture
+## 🎯 Problems & Solutions
 
-The Agent Factory harness operates across four coordinated layers, bridging the LLM's prompt window, the local git environment, and a Neo4j Property Graph.
+| # | The Problem with Coding Agents Today | The Flawed Reality (Without Agent Factory) | Agent Factory Solution (With Neo4j + MCP) | Concrete Engineering Benefit |
+| :- | :--- | :--- | :--- | :--- |
+| **1** | **Architectural Amnesia** | Every prompt starts from zero. The agent has no memory of past decisions, constraints, or past debug cycles. | **3-Tier Persistent Graph Memory**: Short-term sessions, durable long-term facts, and historical reasoning traces. | Seamless continuity across sessions; builds upon past insights instead of repeating mistakes. |
+| **2** | **"AI Slop" & Duplicate Abstractions** | Asked to "add token verification", the agent builds a duplicate `InvitationTokenService` even when a battle-tested `TokenService` exists. | **Graph-Based Reuse Detection**: Vector + AST structural similarity queries detect existing capabilities before coding begins. | Eliminates code bloat; preserves single sources of truth across repositories. |
+| **3** | **Architectural Drift & Layer Violations** | Agents take shortcuts: calling repositories from controllers, ignoring ADRs, or introducing unvetted third-party packages. | **Constraint & Decision Memory**: Architectural Decision Records (ADRs) are first-class nodes enforced via 8 anti-slop guardrails. | Automatic enforcement of system designs (e.g. clean architecture, layer separation). |
+| **4** | **Exploratory Token Tax & Context Pollution** | Agents scan 20–30 files (80k–120k tokens) before coding, inducing attention degradation (*"Lost in the Middle"*) and sky-high bills. | **Graph-Guided Surgical Retrieval**: Neo4j acts as the codebase GPS, pinpointing the exact 2–3 files to touch within a 4k token budget. | **85%–95% token savings**; pristine context window eliminates hallucinations. |
+| **5** | **"Trust Me, It Works" (Lack of Proof)** | Agents claim *"I ran the tests and it works"*, leaving broken regressions or unverified assumptions in pull requests. | **Cryptographic Evidence Store**: LF-normalized SHA-256 hashed test runs, lint outputs, and diff patches attached to PRs. | Maximum reviewer confidence; reproducible, verifiable proof for every commit. |
+| **6** | **Agent Lock-in & Tool Fragmentation** | Bespoke agent tools force developers to abandon their favorite editors and workflows. | **Open Model Context Protocol (MCP)**: Native integration via stdio or HTTP into Claude Code, Cursor, Codex, and VS Code. | Zero vendor lock-in. Keep your preferred IDE while Agent Factory works seamlessly behind the scenes. |
+
+---
+
+## 🧠 Why Graph Thinking & Neo4j?
+
+Traditional AI code assistants rely on flat vector search. But code is not a flat document; it is a **deeply interconnected network of relationships**.
+
+```mermaid
+graph TD
+    subgraph FlatRAG ["Conventional Flat RAG (Blind / Lossy)"]
+        F1["Vector Search: 'find auth files'"] --> F2["Returns: auth.ts, token.ts, login.tsx"]
+        F2 -.-> F3["Missing: Dependency chains, constraints, impact blast radius"]
+    end
+
+    subgraph GraphRAG ["Neo4j Graph Thinking (Context-Rich)"]
+        G1["Vector Entry Point: 'TokenService'"] -->|USES| G2["Redis Cache"]
+        G1 -->|DEFINES_LIFECYCLE| G3["create -> expire -> validate"]
+        G1 -->|CONSTRAINED_BY| G4["ADR-012: TTL Max 15m"]
+        G1 -->|CALLED_BY| G5["PasswordResetService"]
+        G5 -->|AFFECTS| G6["UserAuthRoute"]
+    end
+```
+
+### The Library Card Catalog Analogy
+> *Imagine entering a massive library to find a specific recipe. Today’s coding agents wander down every aisle, pull 50 random books off the shelves, read page 1 of each, and pile them on their desk until it collapses under the weight.  
+> **Agent Factory is the library card catalog.** The agent checks the Neo4j graph index, walks straight to Shelf B, pulls the exact two books needed, and starts cooking immediately.*
+
+### Key Neo4j Capabilities:
+- **`VectorCypherRetriever`**: Combines vector indexing (`chunkEmbedding`, 1536 dims) with multi-hop Cypher traversals in a single atomic query.
+- **2-Hop Dependency Expansion**: Traverses `(:Symbol)-[:USES|CALLS|ACCESSES*1..2]->(:Symbol)` to reveal downstream services, models, and routes that keyword searches miss.
+- **`Text2CypherRetriever`**: Translates natural language questions (*"What endpoints touch TeamRepository?"*) into Cypher via live graph schema visualization (`CALL db.schema.visualization()`).
+- **Knowledge Lifecycle State Machine**: Moves rules through verified states:
+  `(:CandidateMemory) ──[Approve]──> (:ValidatedMemory) ──[Deprecate]──> (:DeprecatedMemory)`
+
+---
+
+## 🏛 Harness Architecture
+
+Agent Factory coordinates four modular layers, connecting the LLM's prompt window, local Git worktrees, and the Neo4j Property Graph:
 
 ```mermaid
 graph TB
@@ -97,8 +174,8 @@ graph TB
         TestRun["Test Runner (Vitest, Pytest, Jest)"]
     end
 
-    %% Wiring
-    Agents -->|MCP JSON-RPC / CLI flags| MCP
+    %% Connections
+    Agents -->|MCP JSON-RPC / CLI| MCP
     MCP --> CE
     MCP --> GE
     MCP --> ES
@@ -121,45 +198,11 @@ graph TB
     GitTree --> Parser
 ```
 
-### The Four Core Harness Subsystems
-
-#### 1. Surgical Context Engine (Killing the "Exploratory Token Tax")
-Standard agents burn 75,000–120,000 tokens scanning directory listings and grepping raw files before writing any code. This explodes context windows and causes attention degradation (*"Lost in the Middle"*).
-- **Hybrid Retrieval**: Combines native Neo4j vector embeddings with Lucene full-text BM25 search via Reciprocal Rank Fusion (RRF).
-- **2-Hop Cypher Graph Expansion**: Traverses `(:Symbol)-[:USES|CALLS|ACCESSES*1..2]->(:Symbol)` to pull downstream services, repositories, and models—even when the user prompt never mentions them by name.
-- **Budget Allocator**: Prioritizes validated constraints (never cut), reusable symbols, patterns, decisions, and tests within an exact token budget (default: 4,000 tokens).
-- **Token Economy Calculator**: Delivers live token savings statistics (`agent-factory context "<task>" --savings`), achieving **85%–95% token savings** and keeping the context window **Pristine (< 5,000 tokens)**.
-
-#### 2. Anti-Slop Guardrails Engine
-Inspects staged git diffs and ast-extracted changes against the base graph across 8 automated checks (`agent-factory check` / MCP `check_changes`):
-1. **Duplication Check**: Uses embedding and method signature similarity (threshold $\ge 0.70$) to detect if a proposed class re-invents an existing service (e.g. `InvitationTokenService` vs. `TokenService`).
-2. **Abstraction Check**: Flags newly introduced classes or functions not declared in the feature plan without architectural justification.
-3. **Architecture Check**: Enforces boundary rules (e.g., Controllers calling Repositories directly violates `ADR-002`).
-4. **Reusability Check**: Identifies bloated controllers ($>300$ LOC) and unexported public services.
-5. **Consistency Check**: Verifies route validation schemas (e.g. Zod) and approved naming conventions.
-6. **Complexity Check**: Blocks duplicate dependency categories (e.g. attempting to install a second ORM or state library).
-7. **Scope Check**: Detects hallucinated file edits exceeding the 2-hop blast radius of planned symbols.
-8. **Regression Runner**: Executes the test suite, verifying exit code `0` and ensuring test counts do not drop.
-
-#### 3. Cryptographic Evidence Store
-Replaces unsubstantiated agent claims (*"I tested it and it works"*) with immutable, verifiable artifacts stored in `.agent-factory/evidence/`:
-- **Normalized SHA-256 Hashing**: Normalizes CRLF/LF line endings to ensure deterministic hashing across Windows, Linux, and macOS.
-- **Secret Redaction**: Automatically detects and redacts high-entropy API keys, JWTs, private keys, and environment credentials before evidence is saved or committed.
-- **Evidence-Backed PR Generator**: `agent-factory pr-body` parses test run outputs, git diff statistics, and verification manifests to generate PR descriptions backed by verifiable cryptographic proofs.
-
-#### 4. 3-Tier Persistent Neo4j Graph Memory
-Anchors repository knowledge in Neo4j 5.26 / Neo4j Aura using three dedicated tiers:
-- **Short-Term Memory**: Conversation threads and branch-specific feature steps (`(:Feature)-[:HAS_STEP]->(:Step)`).
-- **Long-Term Memory**: Durable cross-session entities and relational facts (`(:Entity)-[:HAS_RELATION]->(:Fact)`).
-- **Reasoning Memory**: Queryable problem-solving traces (`how_did_we_handle("<task>")`) showing what strategies succeeded or failed in past tasks.
-- **Knowledge Lifecycle**: Moves rules and patterns through a verified state machine:  
-  `(:CandidateMemory) ──[Approve]──> (:ValidatedMemory) ──[Deprecate]──> (:DeprecatedMemory | :SupersededMemory)`.
-
 ---
 
-## 🔄 End-to-End Harness Workflow
+## 🔄 The 10-Step Lifecycle
 
-Every feature implementation moves through a deterministic 10-step lifecycle enforced by `AGENTS.md` and the harness:
+Every feature implementation moves through a deterministic, verified lifecycle enforced by `AGENTS.md` and the harness:
 
 ```mermaid
 sequenceDiagram
@@ -201,116 +244,158 @@ sequenceDiagram
 
 ---
 
-## 📊 Empirical Benchmarks & Performance Stats
+## 📊 Empirical Benchmarks
 
-### 1. Controlled Experiment: With vs. Without Agent Factory
-Measured across 3 independent, clean-room feature implementations (*"Add team invitations"*) on the `teamapp` reference repository ([docs/eval/with-without.md](docs/eval/with-without.md)):
+### Controlled Clean-Room Experiment: With vs. Without Agent Factory
+Evaluated across 3 independent, clean-room feature implementations (*"Add team invitations"*) on the `teamapp` reference repository ([Full Evaluation Report](docs/eval/with-without.md)):
 
-| Evaluation Metric | Baseline Agent (Claude / Cursor alone) | Agent Factory Harness (Neo4j + MCP) | Impact / Advantage |
-|---|---|---|---|
+| Evaluation Metric | Baseline Agent (Claude / Cursor alone) | Agent Factory Harness (Neo4j + MCP) | Advantage / Impact |
+| :--- | :--- | :--- | :--- |
 | **Duplicate Abstractions** | **3 of 3 runs** created redundant `InvitationTokenService` | **0 of 3 runs** (reused `TokenService`) | **100% duplicate elimination** |
 | **Architectural Drift** | **3 of 3 runs** bypassed service layer (`Controller -> DB`) | **0 of 3 runs** (cleanly routed through Service) | **Zero architectural drift** (`ADR-002` preserved) |
-| **Manifest Bloat** | **2 of 3 runs** installed unvetted crypto libraries | **0 of 3 runs** (reused existing packages) | **Clean dependency manifests** |
+| **Manifest Bloat** | **2 of 3 runs** installed unvetted crypto packages | **0 of 3 runs** (reused existing packages) | **Clean dependency manifests** |
 | **Scope Drift** | 1.3 files modified outside feature scope | **0.0 files** modified outside feature scope | **100% surgical diff targeting** |
 | **Test Regressions** | 66.7% (1 of 3 runs broke existing suites) | **100% passing suites** across all runs | **Zero regression escapes** |
 | **Exploratory Token Tax** | 28,400 – 62,500 tokens (broad scanning & grepping) | **3,420 – 5,200 tokens** (2-hop Cypher traversal) | **82% – 94.5% token reduction** |
 | **Estimated Run Cost** | $0.19 / feature execution | **$0.01 / feature execution** | **19x cheaper LLM inference** |
 | **Verifiable Proof Artifacts**| 0 artifacts (text claim only: *"I tested it"*) | **5 cryptographic artifacts** (diff, patch, log, SHA-256) | **100% cryptographically backed PRs** |
 
-### 2. Engineering & Quality Verification Metrics
+### Quality & Engineering Verification:
 - **Unit Test Suite**: **373 tests passing (100% pass rate)**.
 - **Retrieval Engine Precision**:
-  - `Recall@k`: **&ge; 80%** on benchmark evaluation splits ([docs/eval/retrieval-ablation.md](docs/eval/retrieval-ablation.md)).
+  - `Recall@k`: **&ge; 80%** on benchmark evaluation splits.
   - `MRR (Mean Reciprocal Rank)`: **&ge; 0.60** (Graph expansion demonstrably outranks flat vector-only search).
   - `Reuse Detector Precision & Recall`: **&ge; 80%**.
 - **Implementation Status**: **Phases 0 through 10 fully complete (100%)**.
 
 ---
 
-## 🚀 Quickstart
+## ⚡ Quickstart
 
-### 1. Prerequisites & Environment
-Ensure you have Docker (for local Neo4j) or a Neo4j Aura cloud instance:
+### 1. Prerequisites
+Ensure you have Docker (for local Neo4j) or a Neo4j Aura cloud instance, and Python 3.11+:
+
 ```bash
-docker compose up -d                 # starts local Neo4j 5.26 (or configure Aura in .env)
-cp .env.example .env                 # configure NEO4J_URI, NEO4J_PASSWORD, OPENAI_API_KEY
-uv tool install .                    # install agent-factory CLI globally (or use uv run)
+# Clone the repository
+git clone https://github.com/adityadeokar/agent-factory.git
+cd agent-factory
+
+# Start local Neo4j 5.26 instance (or use Neo4j Aura)
+docker compose up -d
+
+# Setup environment variables
+cp .env.example .env
+
+# Install dependencies using uv
+uv tool install .
 ```
 
 ### 2. Initialize Any Existing Repository
 Inside your project repository:
+
 ```bash
-agent-factory init                   # writes config, .agent-factory/, MCP configs, AGENTS.md
-agent-factory doctor                 # verifies config, Neo4j connectivity, schema, and MCP
-agent-factory audit                  # maps codebase -> AST extraction -> Neo4j knowledge graph
-agent-factory memory review          # interactive CLI to validate candidate patterns & ADRs
+# 1. Initialize configuration, directories, and MCP hooks
+agent-factory init
+
+# 2. Verify environment, Neo4j connectivity, and schemas
+agent-factory doctor
+
+# 3. Ingest and index your repository into Neo4j
+agent-factory audit
+
+# 4. Review candidate architectural patterns and decisions
+agent-factory memory review
 ```
 
+### 3. Editor & IDE Integration
 `agent-factory init` automatically registers the MCP server in:
-- Claude Code (`.mcp.json`)
-- Cursor (`.cursor/mcp.json` and `.cursor/rules/agent-factory.mdc`)
-- VS Code (`.vscode/mcp.json`)
+- **Claude Code** (`.mcp.json`)
+- **Cursor** (`.cursor/mcp.json` and `.cursor/rules/agent-factory.mdc`)
+- **VS Code** (`.vscode/mcp.json`)
 
 ---
 
 ## 🛠 Tool & Command Reference
 
-### Model Context Protocol (MCP) Tools
+### Model Context Protocol (MCP) Tools (17 Tools)
 
-When running `agent-factory mcp serve`, agents gain access to 17 structured tools:
+When running `agent-factory mcp serve`, coding agents gain access to 17 structured tools:
 
-| MCP Tool Name | Access | Purpose |
-|---|---|---|
-| `get_feature_context` | Read | Call before editing code: returns architecture, reusable symbols, rules, and tests within budget. |
-| `get_memory_context` | Read | Universal alias for `get_feature_context`. |
-| `find_reusable` | Read | Call before creating any class/service: detects existing implementations to reuse or extend. |
-| `get_token_savings` | Read | Returns live token economy metrics, surgical retrieval ratios, and context health. |
-| `impact_of` | Read | Blast-radius analysis: shows callers, reaching routes, tests, and co-changed files. |
-| `get_constraints` | Read | Active architectural rules and constraints in force. |
-| `get_patterns` | Read | Validated implementation patterns with file/line evidence. |
-| `search_memory` | Read | Full-text & vector hybrid search across knowledge graph and symbols. |
-| `how_did_we_handle` | Read | Retrieves reasoning traces and tool steps from similar past tasks. |
-| `how_did_i_handle` | Read | Universal alias for `how_did_we_handle`. |
-| `ask_graph` | Read | Read-only Text2Cypher generator and executor for structured codebase queries. |
-| `get_feature` | Read | Current feature session status, plan, and recorded steps. |
-| `check_changes` | Read | Runs the 8 anti-slop guardrails against staged changes and returns findings. |
-| `start_feature` | Write | Initializes a feature session and branch isolation. |
-| `record_plan` | Write | Stores implementation plan (planned reuse, files, justifications, risks). |
-| `propose_memory` | Write | Proposes durable findings (persisted as candidates awaiting review). |
-| `add_evidence` | Write | Cryptographically records test logs, lint outputs, and diff patches. |
-| `complete_feature` | Write | Commits feature audit, updates graph topology, and anchors facts. |
+| MCP Tool Name | Access | Category | Purpose |
+| :--- | :---: | :---: | :--- |
+| `get_feature_context` | Read | Context | Returns surgical architecture, reusable symbols, rules, and tests within budget. |
+| `get_memory_context` | Read | Context | Universal alias for `get_feature_context`. |
+| `find_reusable` | Read | Reuse | Checks vector and AST similarity to detect existing code to reuse before writing code. |
+| `get_token_savings` | Read | Metrics | Returns live token economy statistics, retrieval ratios, and context health. |
+| `impact_of` | Read | Analysis | Blast-radius analysis: callers, reaching routes, tests, and co-changed files. |
+| `get_constraints` | Read | Rules | Active architectural rules, constraints, and ADRs currently in force. |
+| `get_patterns` | Read | Rules | Validated implementation patterns with file/line evidence. |
+| `search_memory` | Read | Search | Full-text & vector hybrid search across the knowledge graph and codebase symbols. |
+| `how_did_we_handle` | Read | Memory | Retrieves reasoning traces and tool execution steps from similar past tasks. |
+| `how_did_i_handle` | Read | Memory | Universal alias for `how_did_we_handle`. |
+| `ask_graph` | Read | Query | Read-only Text2Cypher generator and executor for structured codebase queries. |
+| `get_feature` | Read | Workflow | Current feature session status, plan, and recorded steps. |
+| `check_changes` | Read | Guardrails| Runs the 8 anti-slop guardrails against staged changes and returns findings. |
+| `start_feature` | Write | Workflow | Initializes a feature session and branch isolation. |
+| `record_plan` | Write | Workflow | Stores implementation plan (planned reuse, files, justifications, risks). |
+| `propose_memory` | Write | Memory | Proposes durable findings (persisted as candidates awaiting review). |
+| `add_evidence` | Write | Evidence | Cryptographically records test logs, lint outputs, and diff patches. |
+| `complete_feature` | Write | Workflow | Commits feature audit, updates graph topology, and anchors facts in Neo4j. |
 
-### CLI Commands
+### CLI Commands Cheat Sheet
 
-Every command accepts `--json` for automated agent piping:
+Every command supports `--json` for automated piping:
 
 ```bash
-agent-factory context "<request>" [--budget 4000] [--savings]   # Surgical context pack with token ROI
-agent-factory reuse <Name> [--methods a,b] [--role Service]    # Check abstraction reuse before creating
-agent-factory impact <Symbol|path> [--depth 2]                 # Blast-radius impact analysis
-agent-factory ask "<question>" [--show-cypher]                 # Natural language question -> Cypher query
-agent-factory check [--feature id] [--waive id --reason "..."] # Run the 8 anti-slop guardrails
-agent-factory evidence collect / add / list / verify           # Manage cryptographic evidence store
-agent-factory pr-body [--feature id] [--out pr.md]             # Render evidence-backed PR description
-agent-factory feature start / plan / step / complete / status  # Manage feature lifecycle & memory commit
-agent-factory audit [--full] [--no-embed]                      # Ingest & index repository into Neo4j
-agent-factory doctor [--online]                                # Health check for environment and graph
-agent-factory mcp serve [--http]                               # Start MCP server for coding agents
+# Surgical context pack with live token savings calculation
+agent-factory context "<request>" [--budget 4000] [--savings]
+
+# Check abstraction reuse before creating new classes/services
+agent-factory reuse <Name> [--methods a,b] [--role Service]
+
+# Blast-radius impact analysis
+agent-factory impact <Symbol|path> [--depth 2]
+
+# Natural language question -> Text2Cypher execution
+agent-factory ask "<question>" [--show-cypher]
+
+# Execute the 8 anti-slop guardrails against staged changes
+agent-factory check [--feature id] [--waive id --reason "..."]
+
+# Manage cryptographic evidence store
+agent-factory evidence collect / add / list / verify
+
+# Render evidence-backed pull request description
+agent-factory pr-body [--feature id] [--out pr.md]
+
+# Manage feature lifecycle & memory commit
+agent-factory feature start / plan / step / complete / status
+
+# Ingest and index repository AST into Neo4j
+agent-factory audit [--full] [--no-embed]
+
+# Verify environment and graph connectivity
+agent-factory doctor [--online]
+
+# Start MCP server for coding agents
+agent-factory mcp serve [--http]
 ```
 
 ---
 
-## 📚 Documentation & Reference Links
+## 📚 Documentation & References
 
-- **[Presentation Pointers & Pitch Matrix](docs/presentation-pointers.md)**: Executive talking points, 9-slide pitch deck guide, and problem-solution matrix.
-- **[With/Without Experiment Details](docs/eval/with-without.md)**: Full methodology and qualitative observations from the controlled trial.
-- **[Retrieval Ablation & Quality Analysis](docs/eval/retrieval-ablation.md)**: Rigorous evaluation of vector, keyword, and 2-hop graph expansion.
-- **[Live Demo Cypher Queries](docs/demo/queries.cypher)**: 5 curated Cypher queries for exploring the live graph in Neo4j Browser.
-- **[Demo Script](docs/demo/demo_script.md)**: 5-minute hackathon walkthrough and judging guide.
-- **[Graph Schema Specification](docs/graph-schema.md)**: Detailed node properties, relationship types, and constraints.
+- 📋 **[Presentation Pointers & Pitch Matrix](docs/presentation-pointers.md)**: Executive pitch guide, 9-slide pitch deck walkthrough, and problem-solution mapping.
+- 🔬 **[With vs. Without Controlled Experiment](docs/eval/with-without.md)**: Full methodology, quantitative metrics, and qualitative observations.
+- 📈 **[Retrieval Ablation & Quality Analysis](docs/eval/retrieval-ablation.md)**: Rigorous evaluation of vector, keyword, and 2-hop graph expansion.
+- 🔍 **[Live Demo Cypher Queries](docs/demo/queries.cypher)**: Curated Cypher queries for exploring the live graph in Neo4j Browser.
+- 🎬 **[Demo Walkthrough Script](docs/demo/demo_script.md)**: 5-minute hackathon walkthrough and judging guide.
+- 📐 **[Graph Schema Specification](docs/graph-schema.md)**: Detailed node properties, relationship types, and constraints.
+- 🏛 **[Architectural Benefits Deep Dive](docs/BENEFITS.md)**: Comprehensive deep dive on the engineering return on investment.
 
 ---
 
 ## ⚖️ License & Open Source
 
-Agent Factory is open-source software licensed under the [MIT License](LICENSE).
+Agent Factory is open-source software licensed under the [MIT License](LICENSE).  
+Built with ❤️ by [Aditya Deokar](https://github.com/adityadeokar) for the **Neo4j Hackathon**.
