@@ -1,6 +1,7 @@
 <p align="center">
-  <img src="assets/agent-factory-logo.png" alt="Agent Factory Logo" width="260" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);" />
+  <img src="assets/logo.png" alt="Agent Factory Logo" width="280" />
 </p>
+
 
 <h1 align="center">Agent Factory</h1>
 
