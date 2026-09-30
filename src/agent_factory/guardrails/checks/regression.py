@@ -10,16 +10,16 @@ from __future__ import annotations
 import re
 import subprocess
 import time
+import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-import xml.etree.ElementTree as ET
 
 from ...config.model import ChecksConfig
 from ..model import CheckResult, Finding
 
 if TYPE_CHECKING:
-    from ...diff import DiffFragment
+    pass
 
 _TEST_COUNT_PATTERNS = [
     re.compile(r"(\d+)\s+passed", re.IGNORECASE),
@@ -137,12 +137,11 @@ def check_regression(
                 if test_baseline is not None and count < test_baseline:
                     findings.append(
                         Finding(
-                            id=f"regress-test-count-drop",
+                            id="regress-test-count-drop",
                             check=check_name,
                             severity="fail",
                             message=(
-                                f"Test regression: test count dropped from baseline of {test_baseline} "
-                                f"to {count}."
+                                f"Test regression: test count dropped from baseline of {test_baseline} to {count}."
                             ),
                             fix_hint="Ensure all existing tests pass and no tests were deleted or skipped.",
                         )

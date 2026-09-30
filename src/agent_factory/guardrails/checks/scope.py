@@ -19,9 +19,7 @@ if TYPE_CHECKING:
 MAX_OUT_OF_SCOPE_LINE_RATIO = 0.30
 
 
-def _is_in_scope(
-    path: str, planned_files: set[str], planned_modules: set[str]
-) -> bool:
+def _is_in_scope(path: str, planned_files: set[str], planned_modules: set[str]) -> bool:
     if path in planned_files:
         return True
     # Test files corresponding to planned files
@@ -34,14 +32,10 @@ def _is_in_scope(
         if path.startswith(f"{pm}/") or path == pm:
             return True
     # Standard metadata/test configuration files
-    if path in ("package.json", "tsconfig.json", "pyproject.toml"):
-        return True
-    return False
+    return path in ("package.json", "tsconfig.json", "pyproject.toml")
 
 
-def check_scope(
-    diff: DiffFragment, plan: FeaturePlan | None = None
-) -> CheckResult:
+def check_scope(diff: DiffFragment, plan: FeaturePlan | None = None) -> CheckResult:
     check_name = "scope"
     if not plan or (not plan.planned_files and not plan.planned_modules):
         return CheckResult(

@@ -15,18 +15,14 @@ import pytest
 from agent_factory.auditor.graphview import GraphView, Sym
 from agent_factory.auditor.model import NodeRow
 from agent_factory.config import parse_config
-from agent_factory.context.reuse import ProposedAbstraction, ReuseDetector
+from agent_factory.context.reuse import ProposedAbstraction
 from agent_factory.evidence.pr_body import render_pr_body
 from agent_factory.evidence.store import EvidenceStore
 from agent_factory.guardrails.checks.architecture import check_architecture
-from agent_factory.guardrails.checks.duplication import check_duplication
 from agent_factory.guardrails.diff import DiffFile, DiffFragment
 from agent_factory.guardrails.model import CheckResult, GuardrailReport
-from agent_factory.guardrails.rules import run_guardrails
 from agent_factory.workflow.feature import (
     FeaturePlan,
-    FeatureService,
-    NewAbstraction,
     ReuseDecision,
 )
 
@@ -49,8 +45,12 @@ def test_full_agent_harness_loop(tmp_path: Path):
     # 2. Simulate base graph with TokenService and Controller/Repo constraints
     view = GraphView(project_id)
     view.symbols["proj:s:token"] = Sym(
-        "proj:s:token", "TokenService", "class", "src/services/token.service.ts", {"Service"},
-        methods=["create", "validate", "consume", "expire"]
+        "proj:s:token",
+        "TokenService",
+        "class",
+        "src/services/token.service.ts",
+        {"Service"},
+        methods=["create", "validate", "consume", "expire"],
     )
     view.symbols["proj:s:ctrl"] = Sym(
         "proj:s:ctrl", "TeamController", "class", "src/controllers/team.controller.ts", {"Controller"}
@@ -109,7 +109,11 @@ def test_full_agent_harness_loop(tmp_path: Path):
         added_symbols=[
             NodeRow(
                 uid="proj:s:inv-dup",
-                props={"name": "InvitationTokenService", "kind": "class", "path": "src/services/invitation-token.service.ts"},
+                props={
+                    "name": "InvitationTokenService",
+                    "kind": "class",
+                    "path": "src/services/invitation-token.service.ts",
+                },
                 roles=["Service"],
             )
         ],
@@ -136,12 +140,18 @@ def test_full_agent_harness_loop(tmp_path: Path):
         head_sha="head123",
         files=[
             DiffFile(path="src/services/team-invitation.service.ts", status="A", added_lines=25, deleted_lines=0),
-            DiffFile(path="tests/team-invitation.service.test.ts", status="A", added_lines=20, deleted_lines=0, is_test=True),
+            DiffFile(
+                path="tests/team-invitation.service.test.ts", status="A", added_lines=20, deleted_lines=0, is_test=True
+            ),
         ],
         added_symbols=[
             NodeRow(
                 uid="proj:s:inv-svc",
-                props={"name": "TeamInvitationService", "kind": "class", "path": "src/services/team-invitation.service.ts"},
+                props={
+                    "name": "TeamInvitationService",
+                    "kind": "class",
+                    "path": "src/services/team-invitation.service.ts",
+                },
                 roles=["Service"],
             )
         ],
@@ -155,8 +165,8 @@ def test_full_agent_harness_loop(tmp_path: Path):
 
     # 7. Step: Collect Evidence & Verify
     store = EvidenceStore(root, "feat_20260926_invitations")
-    stat_item = store.record_text("diff", "diff/stat.txt", "2 files changed, +45 lines", "Git diff stat")
-    test_item = store.record_text("test", "tests/stdout.txt", "1 passed (0.4s)", "Vitest output")
+    store.record_text("diff", "diff/stat.txt", "2 files changed, +45 lines", "Git diff stat")
+    store.record_text("test", "tests/stdout.txt", "1 passed (0.4s)", "Vitest output")
 
     ok, errors = store.verify()
     assert ok is True

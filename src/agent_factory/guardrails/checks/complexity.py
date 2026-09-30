@@ -2,8 +2,10 @@
 
 Checks:
 - New external dependencies.
-- A dependency in a category already served (forbid_external_dep, e.g. a 2nd state-management or queue lib) -> fail if violates constraint, else warn.
+- A dependency in a category already served (forbid_external_dep, e.g. a 2nd state-management or queue lib)
+  -> fail if violates constraint, else warn.
 - New infra files (Dockerfile, docker-compose.yml, CI pipelines) -> warn.
+
 """
 
 from __future__ import annotations

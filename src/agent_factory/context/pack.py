@@ -7,7 +7,6 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 from .token_economy import TokenEconomyReport
 
 

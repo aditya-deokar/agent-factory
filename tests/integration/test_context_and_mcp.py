@@ -345,11 +345,15 @@ def test_ask_graph_is_guarded(server, monkeypatch):
     assert is_error and "refused" in text
 
 
-def test_phase8_tools_say_not_available_yet(server):
-    for tool in ("check_changes", "add_evidence", "complete_feature"):
-        args = {"kind": "test_run", "path": "x", "summary": "y"} if tool == "add_evidence" else {}
-        is_error, data = call(server, tool, args)
-        assert not is_error and data["status"] == "not_available_yet"
+def test_phase9_and_10_tools_are_active(server):
+    is_error, data = call(server, "check_changes", {})
+    assert not is_error and "summary" in data and "data" in data
+
+    is_error, text = call(server, "add_evidence", {"kind": "test_run", "path": "x", "summary": "y"})
+    assert is_error and "no active feature" in text
+
+    is_error, text = call(server, "complete_feature", {})
+    assert is_error and "no active feature" in text
 
 
 @pytest.mark.e2e

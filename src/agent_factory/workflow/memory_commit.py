@@ -14,7 +14,8 @@ from ..evidence.store import EvidenceStore
 from ..guardrails.diff import analyze_diff
 from ..memory.agent_memory import feature_session
 from ..memory.validation import EvidenceRef, Proposal
-from ..schema.model import FeatureStatus, KnowledgeKind, Rel
+from ..schema.model import FeatureStatus, KnowledgeKind, KnowledgeSource, Rel
+
 from .feature import FeatureNotFound, check_feature_transition
 
 if TYPE_CHECKING:
@@ -64,7 +65,7 @@ async def complete_feature(
                 rt.root,
                 rt.config,
                 rt.stores,
-                AuditOptions(changed_files=changed_paths),
+                AuditOptions(),
                 embedder=rt.embedder,
             )
             memory_diff["audit_run_uid"] = audit_result.run_uid
@@ -126,7 +127,7 @@ async def complete_feature(
                     kind=KnowledgeKind.DECISION,
                     title=f"Decision for {state.name}",
                     claim=state.plan.architectural_decision,
-                    source="agent:feature",
+                    source=KnowledgeSource.AGENT,
                     evidence=[EvidenceRef(path=p) for p in changed_paths[:5]],
                 )
                 prop_res = rt.knowledge().submit(dec_proposal, actor="agent:memory_commit")

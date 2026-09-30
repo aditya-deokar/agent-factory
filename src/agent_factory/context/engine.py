@@ -34,7 +34,6 @@ from .pack import (
     apply_budget,
 )
 from .query import ParsedQuery, understand
-from .token_economy import compute_token_economy
 from .retrievers import (
     DocHit,
     Fused,
@@ -46,6 +45,7 @@ from .retrievers import (
     vector_docs,
     vector_symbols,
 )
+from .token_economy import compute_token_economy
 
 ALL_MODES = frozenset({"vector", "fulltext", "code", "docs", "history", "graph"})
 SEEDS = 12

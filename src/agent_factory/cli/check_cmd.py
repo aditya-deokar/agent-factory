@@ -19,8 +19,12 @@ check_app = typer.Typer(help="Run anti-slop guardrails on the active feature or 
 @check_app.callback(invoke_without_command=True)
 def check(
     ctx: typer.Context,
-    feature_id: Annotated[str | None, typer.Option("--feature", help="Feature ID to check (defaults to active)")] = None,
-    only: Annotated[str | None, typer.Option("--only", help="Comma-separated check names (e.g. duplication,architecture)")] = None,
+    feature_id: Annotated[
+        str | None, typer.Option("--feature", help="Feature ID to check (defaults to active)")
+    ] = None,
+    only: Annotated[
+        str | None, typer.Option("--only", help="Comma-separated check names (e.g. duplication,architecture)")
+    ] = None,
     waive: Annotated[str | None, typer.Option("--waive", help="Finding ID to waive")] = None,
     reason: Annotated[str | None, typer.Option("--reason", help="Justification reason for the waiver")] = None,
     base: Annotated[str | None, typer.Option("--base", help="Base commit SHA to diff against")] = None,

@@ -44,41 +44,39 @@ def check_consistency(diff: DiffFragment) -> CheckResult:
                 )
 
         # 2. Service naming pattern
-        if Role.SERVICE.value in roles and kind == "class":
-            if not name.endswith("Service"):
-                findings.append(
-                    Finding(
-                        id=f"const-service-naming-{name}",
-                        check=check_name,
-                        severity="warn",
-                        message=f"Service class '{name}' does not follow the '...Service' naming convention.",
-                        path=path,
-                        line=line,
-                        fix_hint=f"Rename '{name}' to '{name}Service' for project consistency.",
-                    )
+        if Role.SERVICE.value in roles and kind == "class" and not name.endswith("Service"):
+            findings.append(
+                Finding(
+                    id=f"const-service-naming-{name}",
+                    check=check_name,
+                    severity="warn",
+                    message=f"Service class '{name}' does not follow the '...Service' naming convention.",
+                    path=path,
+                    line=line,
+                    fix_hint=f"Rename '{name}' to '{name}Service' for project consistency.",
                 )
+            )
 
         # 3. Repository naming pattern
-        if Role.REPOSITORY.value in roles and kind == "class":
-            if not (name.endswith("Repository") or name.endswith("Repo")):
-                findings.append(
-                    Finding(
-                        id=f"const-repo-naming-{name}",
-                        check=check_name,
-                        severity="warn",
-                        message=f"Repository class '{name}' does not follow the '...Repository' naming convention.",
-                        path=path,
-                        line=line,
-                        fix_hint=f"Rename '{name}' to '{name}Repository'.",
-                    )
+        if (
+            Role.REPOSITORY.value in roles
+            and kind == "class"
+            and not (name.endswith("Repository") or name.endswith("Repo"))
+        ):
+            findings.append(
+                Finding(
+                    id=f"const-repo-naming-{name}",
+                    check=check_name,
+                    severity="warn",
+                    message=f"Repository class '{name}' does not follow the '...Repository' naming convention.",
+                    path=path,
+                    line=line,
+                    fix_hint=f"Rename '{name}' to '{name}Repository'.",
                 )
+            )
 
     status = "warn" if findings else "pass"
-    summary = (
-        "Consistency patterns satisfied."
-        if status == "pass"
-        else f"{len(findings)} consistency finding(s)."
-    )
+    summary = "Consistency patterns satisfied." if status == "pass" else f"{len(findings)} consistency finding(s)."
 
     return CheckResult(
         check=check_name,

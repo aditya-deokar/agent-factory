@@ -102,7 +102,7 @@ def status(ctx: typer.Context) -> None:
             from ..evidence.store import EvidenceStore
             from ..runtime import Runtime
 
-            rt = Runtime(st.root, config, stores, env=st.env)
+            rt = Runtime(st.root, config, stores)
             feat = rt.features().active()
             if feat:
                 ev_store = EvidenceStore(st.root, feat.feature_id)
@@ -148,8 +148,9 @@ def status(ctx: typer.Context) -> None:
             plan_str = "plan ✓" if feat["has_plan"] else "plan ✗"
             gr = feat.get("guardrails")
             gr_str = f"guardrails {gr.get('status', 'not run')}" if gr else "guardrails not run"
-            ev_str = f"evidence {feat['evidence_count']} items ({'verified' if feat['evidence_verified'] else 'unverified'})"
+            ev_str = (
+                f"evidence {feat['evidence_count']} items ({'verified' if feat['evidence_verified'] else 'unverified'})"
+            )
             c.print(f"         {plan_str} · {gr_str} · {ev_str}")
 
     emit(ctx, result, render)
-

@@ -83,6 +83,7 @@ def status(ctx: typer.Context, feature_id: Annotated[str | None, typer.Argument(
     if state is not None:
         emit(ctx, state, lambda c: c.print(render_plan(state), markup=False))
         return
+
     def render(c: Console) -> None:
         if not sessions:
             c.print("No feature sessions yet.")
@@ -126,4 +127,3 @@ def waive(
         except FeatureNotFound as error:
             fail(str(error))
     emit(ctx, state, lambda c: c.print(f"Waiver registered for [bold]{finding_id}[/] on {state.feature_id}."))
-

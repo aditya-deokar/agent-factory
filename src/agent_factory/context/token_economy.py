@@ -45,12 +45,20 @@ class TokenEconomyReport:
         )
         scanned_blind = min(self.total_repo_files, 25)
 
+        f_ratio = f"{self.surgical_retrieval_ratio:.1f}% fewer files"
+        t_sav = f"{self.savings_percentage:.1f}% token savings"
         lines = [
             "| Metric | Blind Exploration (Baseline) | Agent Factory (Graph-Guided) | Advantage |",
             "|---|---|---|---|",
-            f"| **Files Targeted / Read** | {scanned_blind} files | {self.targeted_files} files | {self.surgical_retrieval_ratio:.1f}% fewer files |",
-            f"| **Tokens Consumed** | {self.blind_exploration_tokens_est:,} tokens | {self.graph_context_tokens:,} tokens | {self.savings_percentage:.1f}% token savings |",
-            f"| **Context Window Health** | Polluted (diluted reasoning) | {self.context_health} (high focus) | Maximum reasoning focus |",
+            (f"| **Files Targeted / Read** | {scanned_blind} files | {self.targeted_files} files | {f_ratio} |"),
+            (
+                f"| **Tokens Consumed** | {self.blind_exploration_tokens_est:,} tokens | "
+                f"{self.graph_context_tokens:,} tokens | {t_sav} |"
+            ),
+            (
+                "| **Context Window Health** | Polluted (diluted reasoning) | "
+                f"{self.context_health} (high focus) | Maximum reasoning focus |"
+            ),
             f"| **Estimated Run Cost** | ${cost_blind:.2f} | ${cost_graph:.2f} | {multiplier}x cheaper |",
         ]
         return "\n".join(lines)

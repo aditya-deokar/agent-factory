@@ -58,7 +58,7 @@ def collect(
         )
 
         items = store.list_items()
-        verified, errors = store.verify()
+        verified, _errors = store.verify()
 
     def render(c: Console) -> None:
         status_text = "[green]✓ Verified[/]" if verified else "[red]✗ Tampered/Missing[/]"
@@ -93,7 +93,9 @@ def add(
         store = EvidenceStore(rt.root, state.feature_id)
         item = store.add_artifact(kind, file_path, summary)
 
-    emit(ctx, item, lambda c: c.print(f"Registered evidence [bold]{item.id}[/]: {item.path} (SHA {item.sha256[:10]}...)"))
+    emit(
+        ctx, item, lambda c: c.print(f"Registered evidence [bold]{item.id}[/]: {item.path} (SHA {item.sha256[:10]}...)")
+    )
 
 
 @evidence_app.command("list")

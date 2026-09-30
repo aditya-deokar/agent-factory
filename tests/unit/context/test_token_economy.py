@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from agent_factory.context.token_economy import TokenEconomyReport, compute_token_economy
+from agent_factory.context.token_economy import compute_token_economy
 
 
 def test_compute_token_economy_standard_repo():

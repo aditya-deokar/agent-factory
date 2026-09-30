@@ -7,7 +7,7 @@ plan.new_abstractions -> fail.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from ...context.reuse import ProposedAbstraction, ReuseDetector
 from ...workflow.feature import FeaturePlan
@@ -30,9 +30,7 @@ def check_duplication(
             summary="Reuse detector unavailable (no embeddings or no graph); duplication check skipped.",
         )
 
-    planned_justifications = {
-        a.name: a.justification for a in (plan.new_abstractions if plan else [])
-    }
+    planned_justifications = {a.name: a.justification for a in (plan.new_abstractions if plan else [])}
 
     findings: list[Finding] = []
     # Check all added role-bearing symbols
@@ -65,8 +63,7 @@ def check_duplication(
             justification = planned_justifications.get(name)
             finding_id = f"dup-{name}"
             msg = (
-                f"Proposed abstraction '{name}' duplicates existing '{top.name}' "
-                f"(similarity {top.score:.2f} >= 0.70)."
+                f"Proposed abstraction '{name}' duplicates existing '{top.name}' (similarity {top.score:.2f} >= 0.70)."
             )
             fix_hint = (
                 f"Reuse or extend existing '{top.name}' "

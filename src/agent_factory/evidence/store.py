@@ -12,7 +12,6 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from ..common.redact import redact
-from ..schema.model import Label, Rel
 from ..schema.uids import feature_uid
 
 

@@ -25,9 +25,7 @@ def check_abstraction(
     check_name = "abstraction"
     planned_names = {a.name for a in (plan.new_abstractions if plan else [])}
 
-    added_role_symbols = [
-        s for s in diff.added_symbols if s.roles and s.props.get("kind") in ("class", "function")
-    ]
+    added_role_symbols = [s for s in diff.added_symbols if s.roles and s.props.get("kind") in ("class", "function")]
 
     findings: list[Finding] = []
 

@@ -12,17 +12,12 @@ import posixpath
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
-from ..auditor.classify import decide, local_scores
 from ..auditor.graphview import GraphView, Sym
 from ..auditor.model import EdgeRow, NodeRow, ParsedFile, SourceFile
 from ..auditor.parsers import parse_source
 from ..auditor.resolve import Resolver
 from ..common.paths import git
-from ..common.redact import redact
-from ..schema.model import Rel, Role
-from ..schema.uids import file_uid, symbol_uid
 
 _CODE_EXTS = {
     ".ts": "typescript",
@@ -284,19 +279,19 @@ def analyze_diff(
     # overlay new symbols
     if frag:
         for row in frag.symbols:
-            p = row.props
+            props = row.props
             overlay.symbols[row.uid] = Sym(
                 uid=row.uid,
-                name=p["name"],
-                kind=p["kind"],
-                path=p["path"],
+                name=props["name"],
+                kind=props["kind"],
+                path=props["path"],
                 roles=set(row.roles),
-                parent_uid=f"{row.uid.split('#', 1)[0]}#{p['parent']}" if p.get("parent") else None,
-                methods=list(p.get("methods") or []),
-                line_start=p.get("line_start", 1),
-                line_end=p.get("line_end", 1),
-                exported=bool(p.get("exported")),
-                props=dict(p),
+                parent_uid=f"{row.uid.split('#', 1)[0]}#{props['parent']}" if props.get("parent") else None,
+                methods=list(props.get("methods") or []),
+                line_start=props.get("line_start", 1),
+                line_end=props.get("line_end", 1),
+                exported=bool(props.get("exported")),
+                props=dict(props),
             )
         for f in frag.files:
             overlay.files[f["path"]] = {

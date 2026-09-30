@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class CheckSeverity(str, Enum):
+class CheckSeverity(StrEnum):
     PASS = "pass"
     WARN = "warn"
     FAIL = "fail"
@@ -60,9 +60,7 @@ class GuardrailReport(BaseModel):
     created_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     @classmethod
-    def from_checks(
-        cls, project_id: str, checks: list[CheckResult], feature_id: str | None = None
-    ) -> GuardrailReport:
+    def from_checks(cls, project_id: str, checks: list[CheckResult], feature_id: str | None = None) -> GuardrailReport:
         has_fail = any(c.has_fails for c in checks)
         has_warn = any(c.has_warns for c in checks)
         status = "fail" if has_fail else ("warn" if has_warn else "pass")

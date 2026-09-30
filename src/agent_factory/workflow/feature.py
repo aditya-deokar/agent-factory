@@ -296,7 +296,6 @@ class FeatureService:
         return await complete_feature(self.rt, fid, outcome=outcome, pr_url=pr_url, pre_merge=pre_merge)
 
 
-
 def render_plan(state: FeatureState) -> str:
     p = state.plan or FeaturePlan()
     out = ["# FEATURE PLAN", "", f"Feature: {state.name}", f"Request: {state.request}", ""]

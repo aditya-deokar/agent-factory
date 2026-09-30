@@ -7,9 +7,9 @@ from pathlib import Path
 import pytest
 
 from agent_factory.auditor.graphview import GraphView, Sym
-from agent_factory.auditor.model import EdgeRow, NodeRow
+from agent_factory.auditor.model import NodeRow
 from agent_factory.config.model import ChecksConfig
-from agent_factory.context.reuse import ProposedAbstraction, ReuseCandidate, ReuseDetector, ReuseReport
+from agent_factory.context.reuse import ProposedAbstraction, ReuseCandidate, ReuseReport
 from agent_factory.guardrails.checks.abstraction import check_abstraction
 from agent_factory.guardrails.checks.architecture import check_architecture
 from agent_factory.guardrails.checks.complexity import check_complexity
@@ -20,11 +20,9 @@ from agent_factory.guardrails.checks.reusability import check_reusability
 from agent_factory.guardrails.checks.scope import check_scope
 from agent_factory.guardrails.diff import DiffFile, DiffFragment
 from agent_factory.workflow.feature import (
-    FeatureNotFound,
     FeaturePlan,
     IllegalFeatureTransition,
     NewAbstraction,
-    ReuseDecision,
     check_feature_transition,
 )
 
@@ -106,8 +104,7 @@ def test_abstraction_warns_on_undeclared_or_excessive():
         base_sha="abc",
         head_sha="def",
         added_symbols=[
-            NodeRow(uid=f"s:{i}", props={"name": f"Service{i}", "kind": "class"}, roles=["Service"])
-            for i in range(5)
+            NodeRow(uid=f"s:{i}", props={"name": f"Service{i}", "kind": "class"}, roles=["Service"]) for i in range(5)
         ],
     )
     res = check_abstraction(diff, plan=FeaturePlan(), max_abstractions=3)
@@ -117,7 +114,9 @@ def test_abstraction_warns_on_undeclared_or_excessive():
 
 def test_architecture_fails_on_forbidden_dependency():
     view = GraphView("test")
-    view.symbols["c:controller"] = Sym("c:controller", "InviteController", "class", "src/controllers/invite.ts", {"Controller"})
+    view.symbols["c:controller"] = Sym(
+        "c:controller", "InviteController", "class", "src/controllers/invite.ts", {"Controller"}
+    )
     view.symbols["r:repo"] = Sym("r:repo", "TeamRepository", "class", "src/repos/team.ts", {"Repository"})
     view.add_edge("USES", "c:controller", "r:repo")
 
@@ -126,7 +125,11 @@ def test_architecture_fails_on_forbidden_dependency():
         base_sha="abc",
         head_sha="def",
         added_symbols=[
-            NodeRow(uid="c:controller", props={"name": "InviteController", "path": "src/controllers/invite.ts"}, roles=["Controller"])
+            NodeRow(
+                uid="c:controller",
+                props={"name": "InviteController", "path": "src/controllers/invite.ts"},
+                roles=["Controller"],
+            )
         ],
         overlay_view=view,
     )
@@ -158,7 +161,13 @@ def test_reusability_warns_on_bloated_controller_or_unexported_service():
             ),
             NodeRow(
                 uid="s:svc",
-                props={"name": "SecretService", "kind": "class", "loc": 10, "exported": False, "path": "src/services/secret.ts"},
+                props={
+                    "name": "SecretService",
+                    "kind": "class",
+                    "loc": 10,
+                    "exported": False,
+                    "path": "src/services/secret.ts",
+                },
                 roles=["Service"],
             ),
         ],

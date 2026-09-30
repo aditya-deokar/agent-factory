@@ -454,7 +454,6 @@ def build_server(factory: Callable[[], Runtime]) -> MCPServer:
     @server.tool(annotations=WRITE)
     async def add_evidence(kind: str, path: str, summary: str, feature_id: str | None = None) -> dict[str, Any]:
         """Register an evidence artifact (test output, screenshot, recording) for the active feature."""
-        from ..workflow.feature import FeatureNotFound
 
         async def work() -> dict[str, Any]:
             runtime = rt()
@@ -493,7 +492,6 @@ def build_server(factory: Callable[[], Runtime]) -> MCPServer:
             return {"summary": result["summary"], "data": result}
 
         return await traced("complete_feature", {"outcome": outcome, "pr_url": pr_url}, feature_id, work)
-
 
     # -- resources & prompts --------------------------------------------------------------------------------------
 

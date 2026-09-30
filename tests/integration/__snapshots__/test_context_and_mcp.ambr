@@ -261,6 +261,39 @@
       }),
       'read_only': True,
     }),
+    'get_memory_context': dict({
+      'input': dict({
+        'properties': dict({
+          'budget_tokens': dict({
+            'default': 4000,
+            'title': 'Budget Tokens',
+            'type': 'integer',
+          }),
+          'feature_id': dict({
+            'anyOf': list([
+              dict({
+                'type': 'string',
+              }),
+              dict({
+                'type': 'null',
+              }),
+            ]),
+            'default': None,
+            'title': 'Feature Id',
+          }),
+          'request': dict({
+            'title': 'Request',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'request',
+        ]),
+        'title': 'get_memory_contextArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
     'get_patterns': dict({
       'input': dict({
         'properties': dict({
@@ -283,6 +316,43 @@
           }),
         }),
         'title': 'get_patternsArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'get_token_savings': dict({
+      'input': dict({
+        'properties': dict({
+          'budget_tokens': dict({
+            'default': 4000,
+            'title': 'Budget Tokens',
+            'type': 'integer',
+          }),
+          'request': dict({
+            'title': 'Request',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'request',
+        ]),
+        'title': 'get_token_savingsArguments',
+        'type': 'object',
+      }),
+      'read_only': True,
+    }),
+    'how_did_i_handle': dict({
+      'input': dict({
+        'properties': dict({
+          'task': dict({
+            'title': 'Task',
+            'type': 'string',
+          }),
+        }),
+        'required': list([
+          'task',
+        ]),
+        'title': 'how_did_i_handleArguments',
         'type': 'object',
       }),
       'read_only': True,

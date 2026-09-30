@@ -16,8 +16,9 @@ def test_evidence_verify_detects_tamper(tmp_path: Path):
     test_file = tmp_path / "output.txt"
     test_file.write_text("All 45 tests passed clean.", encoding="utf-8")
 
-    item = store.add_artifact("test", test_file, "Test execution log", rel_dest="tests/stdout.txt")
+    store.add_artifact("test", test_file, "Test execution log", rel_dest="tests/stdout.txt")
     ok, errors = store.verify()
+
     assert ok is True
     assert len(errors) == 0
 

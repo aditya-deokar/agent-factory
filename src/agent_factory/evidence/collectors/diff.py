@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from ..store import EvidenceStore
 
 if TYPE_CHECKING:
-    from ...guardrails.diff import DiffFragment
+    pass
 
 
 def collect_diff_evidence(

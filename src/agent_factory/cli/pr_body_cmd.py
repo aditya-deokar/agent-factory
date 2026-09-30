@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from pathlib import Path
 from typing import Annotated
 
@@ -41,10 +42,8 @@ def pr_body(
         guardrail_report = None
         gr_path = ev_store.dir / "guardrail-report.json"
         if gr_path.exists():
-            try:
+            with contextlib.suppress(Exception):
                 guardrail_report = GuardrailReport.model_validate_json(gr_path.read_text(encoding="utf-8"))
-            except Exception:
-                pass
 
         body = render_pr_body(state, diff, ev_store, guardrail_report=guardrail_report)
 

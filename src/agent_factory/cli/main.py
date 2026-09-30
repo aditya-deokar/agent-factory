@@ -66,7 +66,6 @@ app.add_typer(evidence_app, name="evidence")
 app.add_typer(mcp_app, name="mcp")
 
 
-
 _GLOBAL_FLAGS = ("--json", "--verbose", "-v")
 
 

@@ -33,7 +33,9 @@ def context(
     request: Annotated[str, typer.Argument(help='The feature or change, e.g. "Add team invitations"')],
     budget: Annotated[int, typer.Option(help="Token budget for the pack")] = 4000,
     history: Annotated[bool, typer.Option("--history", help="Include deprecated and superseded knowledge")] = False,
-    savings: Annotated[bool, typer.Option("--savings", "--metrics", help="Display token economy comparison table")] = False,
+    savings: Annotated[
+        bool, typer.Option("--savings", "--metrics", help="Display token economy comparison table")
+    ] = False,
 ) -> None:
     """Everything an agent should know before implementing REQUEST (spec §15)."""
     from rich.table import Table

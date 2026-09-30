@@ -34,38 +34,44 @@ def check_reusability(diff: DiffFragment) -> CheckResult:
         line = props.get("line_start")
 
         # 1. Controller/Route LOC check
-        if Role.CONTROLLER.value in roles or Role.ROUTE.value in roles:
-            if kind in ("function", "method") and loc > MAX_CONTROLLER_METHOD_LOC:
-                findings.append(
-                    Finding(
-                        id=f"reuse-controller-loc-{name}",
-                        check=check_name,
-                        severity="warn",
-                        message=(
-                            f"Controller/route '{name}' has {loc} lines of code "
-                            f"(threshold is {MAX_CONTROLLER_METHOD_LOC}). "
-                            "Controllers should only orchestrate; extract business logic into a Service."
-                        ),
-                        path=path,
-                        line=line,
-                        fix_hint="Extract multi-step operations and domain rules into a domain service.",
-                    )
+        if (
+            (Role.CONTROLLER.value in roles or Role.ROUTE.value in roles)
+            and kind
+            in (
+                "function",
+                "method",
+            )
+            and loc > MAX_CONTROLLER_METHOD_LOC
+        ):
+            findings.append(
+                Finding(
+                    id=f"reuse-controller-loc-{name}",
+                    check=check_name,
+                    severity="warn",
+                    message=(
+                        f"Controller/route '{name}' has {loc} lines of code "
+                        f"(threshold is {MAX_CONTROLLER_METHOD_LOC}). "
+                        "Controllers should only orchestrate; extract business logic into a Service."
+                    ),
+                    path=path,
+                    line=line,
+                    fix_hint="Extract multi-step operations and domain rules into a domain service.",
                 )
+            )
 
         # 2. Service export check
-        if Role.SERVICE.value in roles and kind == "class":
-            if not props.get("exported", False):
-                findings.append(
-                    Finding(
-                        id=f"reuse-unexported-service-{name}",
-                        check=check_name,
-                        severity="warn",
-                        message=f"Service '{name}' is defined but not exported for reuse.",
-                        path=path,
-                        line=line,
-                        fix_hint="Export the service class so other modules and controllers can reuse it.",
-                    )
+        if Role.SERVICE.value in roles and kind == "class" and not props.get("exported", False):
+            findings.append(
+                Finding(
+                    id=f"reuse-unexported-service-{name}",
+                    check=check_name,
+                    severity="warn",
+                    message=f"Service '{name}' is defined but not exported for reuse.",
+                    path=path,
+                    line=line,
+                    fix_hint="Export the service class so other modules and controllers can reuse it.",
                 )
+            )
 
     # 3. Direct controller to repository/model check
     if overlay:
@@ -86,7 +92,10 @@ def check_reusability(diff: DiffFragment) -> CheckResult:
                                 ),
                                 path=s.props.get("path"),
                                 line=s.props.get("line_start"),
-                                fix_hint=f"Delegate data access to an intermediate Service rather than calling '{d_sym.name}' directly.",
+                                fix_hint=(
+                                    f"Delegate data access to an intermediate Service rather than calling "
+                                    f"'{d_sym.name}' directly."
+                                ),
                             )
                         )
 

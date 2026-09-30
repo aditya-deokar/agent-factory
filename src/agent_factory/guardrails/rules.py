@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from ..workflow.feature import FeaturePlan
 from .checks import (
@@ -112,12 +111,8 @@ def run_guardrails(
         out_dir = rt.root / ".agent-factory" / "evidence" / feature_id
         try:
             out_dir.mkdir(parents=True, exist_ok=True)
-            (out_dir / "guardrail-report.json").write_text(
-                report.model_dump_json(indent=2), encoding="utf-8"
-            )
-            (out_dir / "guardrail-report.md").write_text(
-                report.to_markdown(), encoding="utf-8"
-            )
+            (out_dir / "guardrail-report.json").write_text(report.model_dump_json(indent=2), encoding="utf-8")
+            (out_dir / "guardrail-report.md").write_text(report.to_markdown(), encoding="utf-8")
         except OSError:
             pass
 
