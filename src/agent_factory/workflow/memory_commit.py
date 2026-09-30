@@ -15,7 +15,6 @@ from ..guardrails.diff import analyze_diff
 from ..memory.agent_memory import feature_session
 from ..memory.validation import EvidenceRef, Proposal
 from ..schema.model import FeatureStatus, KnowledgeKind, KnowledgeSource, Rel
-
 from .feature import FeatureNotFound, check_feature_transition
 
 if TYPE_CHECKING:
